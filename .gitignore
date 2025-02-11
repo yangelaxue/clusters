@@ -1,3 +1,12 @@
+# Data files
+*.dbl*
+*.out
+
+# Images and movies
+*.png
+*.pdf
+*.mp4
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
