@@ -1,6 +1,7 @@
 # Data files
 *.dbl*
 *.out
+*.txt
 
 # Images and movies
 *.png
