@@ -7,6 +7,12 @@
 *.pdf
 *.mp4
 
+
+#AST5220-Cosmology/
+#TurboGenPY/
+
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

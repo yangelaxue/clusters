@@ -1,0 +1,891 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+ \usepackage{txfonts}
+\usepackage{mathptmx}
+\end_preamble
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding iso8859-15
+\fontencoding default
+\font_roman times
+\font_sans default
+\font_typewriter cmtt
+\font_math auto
+\font_default_family rmdefault
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 12
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 0
+\use_package mathtools 1
+\use_package mhchem 2
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2cm
+\topmargin 2cm
+\rightmargin 2cm
+\bottommargin 2cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Synthetic Isotropic Turbulence based on a Specified Energy Spectrum
+\end_layout
+
+\begin_layout Author
+Tony Saad
+\end_layout
+
+\begin_layout Abstract
+Given a turbulent energy spectrum, the task is to generate an isotropic
+ turbulent velocity field that reproduces the input spectrum.
+ I will use Lars Davidson's 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "davidson2008hybrid"
+
+\end_inset
+
+ formulation for generating inlet turbulent data.
+ His method is easily extendable to three dimensions as well as different
+ resolutions in space.
+ 
+\end_layout
+
+\begin_layout Section
+Formulation
+\end_layout
+
+\begin_layout Standard
+We start with a generalized Fourier series for a real valued scalar function
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+u=a_{0}+\sum_{m=1}^{M}a_{m}\cos(\frac{2\pi mx}{L})+b_{m}\sin(\frac{2\pi mx}{L})
+\end{equation}
+
+\end_inset
+
+For simplicity, we set 
+\begin_inset Formula $k_{m}\equiv\frac{2\pi m}{L}$
+\end_inset
+
+ as the 
+\begin_inset Formula $m^{\mbox{th}}$
+\end_inset
+
+ wave number.
+ Also, if the mean of 
+\begin_inset Formula $f$
+\end_inset
+
+ is known, we have
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\int_{0}^{L}u\,\text{d}x=a_{0}
+\end{equation}
+
+\end_inset
+
+Hence, for a turbulent velocity field with zero mean (in space), we can
+ set 
+\begin_inset Formula $a_{0}=0$
+\end_inset
+
+.
+ At the outset, we have
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+u=\sum_{m=1}^{M}a_{m}\cos(k_{m}x)+b_{m}\sin(k_{m}x)
+\end{equation}
+
+\end_inset
+
+We now introduce the following changes
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+a_{m}=\hat{u}_{m}\cos(\psi_{m});\quad b_{m}=\hat{u}_{m}\sin(\psi_{m});\quad\hat{u}_{m}^{2}=a_{m}^{2}+b_{m}^{2},\quad\psi_{m}=\arctan(\frac{b_{m}}{a_{m}})
+\end{equation}
+
+\end_inset
+
+then
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\begin{alignedat}{1}a_{m}\cos(k_{m}x)+b_{m}\sin(k_{m}x) & =\hat{u}_{m}\cos(\psi_{m})\cos(k_{m}x)+\hat{u}_{m}\sin(\psi_{m})\sin(k_{m}x)\\
+ & =\hat{u}_{m}\cos(k_{m}x-\psi_{m})
+\end{alignedat}
+\end{equation}
+
+\end_inset
+
+so that
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+u=\sum_{m=1}^{M}\hat{u}_{m}\cos(k_{m}x-\psi_{m})
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The extension to 3D follows
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+u=\sum_{m=1}^{M}\hat{u}_{m}\cos(\mathbf{k}_{m}\cdot\mathbf{x}-\psi_{m})
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\varv=\sum_{m=1}^{M}\hat{\varv}_{m}\cos(\mathbf{k}_{m}\cdot\mathbf{x}-\psi_{m})
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+w=\sum_{m=1}^{M}\hat{w}_{m}\cos(\mathbf{k}_{m}\cdot\mathbf{x}-\psi_{m})
+\end{equation}
+
+\end_inset
+
+where 
+\begin_inset Formula $\mathbf{k}_{m}\equiv(k_{x,m},k_{y,m},k_{z,m})$
+\end_inset
+
+ is the position vector in wave space and 
+\begin_inset Formula $\mathbf{x}\equiv(x,y,z)$
+\end_inset
+
+ is the position vector in physical space.
+ Therefore, 
+\begin_inset Formula $\mathbf{k}_{m}\cdot\mathbf{x}_{m}=k_{x,m}x+k_{y,m}y+k_{z,m}z$
+\end_inset
+
+.
+ A condensed form is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\mathbf{u}=\sum_{m=1}^{M}\hat{\mathbf{u}}_{m}\cos(\mathbf{k}_{m}\cdot\mathbf{x}-\psi_{m})
+\end{equation}
+
+\end_inset
+
+where 
+\begin_inset Formula $\hat{\mathbf{u}}_{m}\equiv(\hat{u}_{m},\hat{v}_{m},\hat{w}_{m})$
+\end_inset
+
+.
+ Continuity dictates that
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\frac{\partial u}{\partial x}+\frac{\partial\varv}{\partial y}+\frac{\partial w}{\partial z}=0
+\end{equation}
+
+\end_inset
+
+This gives
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+-\sum_{m=1}^{m}\left(k_{x,m}\hat{u}_{m}+k_{y,m}\hat{v}_{m}+k_{z,m}\hat{w}_{m}\right)\sin(\mathbf{k}_{m}\cdot\mathbf{x}-\psi_{m})=0
+\end{equation}
+
+\end_inset
+
+or
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\sum_{m}\mathbf{k}_{m}\cdot\hat{\mathbf{u}}_{m}\sin(\mathbf{k}_{m}\cdot\mathbf{x}-\psi_{m})=0\label{eq:continuity-continuous}
+\end{equation}
+
+\end_inset
+
+This equation can be enforced by setting
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathbf{k}_{m}\cdot\hat{\mathbf{u}}_{m}=0,\;\forall\: m\in\{0,1,\cdots,M\}
+\]
+
+\end_inset
+
+This means that the Fourier coefficients have different directions in wave
+ space.
+ We therefore write the Fourier coefficients as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\hat{\mathbf{u}}_{m}\equiv q_{m}\boldsymbol{\sigma}_{m}\mid\mathbf{k}_{m}\cdot\boldsymbol{\sigma}_{m}=0
+\end{equation}
+
+\end_inset
+
+where 
+\begin_inset Formula $\boldsymbol{\sigma}_{m}$
+\end_inset
+
+ is a unit vector computed such that 
+\begin_inset Formula $\mathbf{k}_{m}\cdot\boldsymbol{\sigma}_{m}=0$
+\end_inset
+
+ at any point 
+\begin_inset Formula $\mathbf{x}$
+\end_inset
+
+.
+ Note that this is the original formulation presented in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "davidson2008hybrid"
+
+\end_inset
+
+.
+ While 
+\begin_inset CommandInset ref
+LatexCommand formatted
+reference "eq:continuity-continuous"
+
+\end_inset
+
+ is true in the continuous sense, it becomes invalid when discretized leading
+ to a diverging velocity field.
+ I will show you how to fix this in the next paragraph.
+\end_layout
+
+\begin_layout Standard
+The velocity vector at point 
+\begin_inset Formula $\mathbf{x}$
+\end_inset
+
+ is now at hand
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\mathbf{u}(\mathbf{x})=\sum_{m=1}^{M}q_{m}\cos(\mathbf{k}_{m}\cdot\mathbf{x}-\psi_{m})\boldsymbol{\sigma}_{m}
+\end{equation}
+
+\end_inset
+
+The last step is to link 
+\begin_inset Formula $q_{m}$
+\end_inset
+
+ to the energy spectrum.
+ This can be computed from
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+q_{m}=2\sqrt{E(k_{m})\Delta k}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Enforcing Continuity
+\end_layout
+
+\begin_layout Standard
+Given an analytic vector field 
+\begin_inset Formula $\mathbf{u}$
+\end_inset
+
+ such that 
+\begin_inset Formula $\nabla\cdot\mathbf{u}=0$
+\end_inset
+
+, we show here that this does not hold for the discrete continuity equation.
+ Since different codes use different discretization schemes for the dilatation
+ term (staggered vs collocated), one must first write the divergence formula
+ in the desired discrete form and then infer the condition that enforces
+ discrete divergence.
+ A classic example is the Taylor-Green vortex initialization.
+ This velocity field is given by
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+u=\sin x\cos y
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\varv=-\cos x\sin y
+\end{equation}
+
+\end_inset
+
+It is true that, for this velocity field, 
+\begin_inset Formula $\nabla\cdot\mathbf{u}=0$
+\end_inset
+
+ because
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\nabla\cdot\mathbf{u}=\frac{\partial u}{\partial x}+\frac{\partial\varv}{\partial y}=\cos x\cos y-\cos x\cos y=0
+\end{equation}
+
+\end_inset
+
+However, when used to initialize a discrete grid, the resulting discrete
+ continuity equation does not always hold true.
+ Take for instance the Taylor-Green vortex and initialize a staggered grid.
+ Continuity, to second order in space on a staggered grid implies
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\frac{\partial u}{\partial x}+\frac{\partial\varv}{\partial y}\approx\frac{u(x+\tfrac{\Delta x}{2},y)-u(x-\tfrac{\Delta x}{2},y)}{\Delta x}+\frac{\varv(x,y+\tfrac{\Delta y}{2})-\varv(x,y-\tfrac{\Delta y}{2})}{\Delta y}
+\end{equation}
+
+\end_inset
+
+Then, using the formula for 
+\begin_inset Formula $u$
+\end_inset
+
+ and 
+\begin_inset Formula $\varv$
+\end_inset
+
+, e.g.
+ 
+\begin_inset Formula $u(x+\tfrac{\Delta x}{2},y)=\sin(x+\tfrac{\Delta x}{2})\cos y$
+\end_inset
+
+, etc..., one recovers
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\frac{\partial u}{\partial x}+\frac{\partial\varv}{\partial y}\approx2\cos x\cos y\left[\frac{\sin\left(\frac{\Delta x}{2}\right)}{\Delta x}-\frac{\sin\left(\frac{\Delta y}{2}\right)}{\Delta y}\right]
+\end{equation}
+
+\end_inset
+
+which is guaranteed to be zero when 
+\begin_inset Formula $\Delta x=\Delta y$
+\end_inset
+
+.
+ A nonuniform grid spacing will always result in a diverging initial condition.
+ The overall less that I'd like to convey here is that it is generally preferabl
+e to operate with the discrete form of equations since those usually bring
+ up hidden issues that can be easily missed in the continuous sense.
+\end_layout
+
+\begin_layout Standard
+Back to our isotropic velocity field, recall that 
+\begin_inset Formula 
+\begin{equation}
+\mathbf{u}(\mathbf{x})=\sum_{m=1}^{M}q_{m}\cos(\mathbf{k}_{m}\cdot\mathbf{x}-\psi_{m})\boldsymbol{\sigma}_{m}
+\end{equation}
+
+\end_inset
+
+Now, write the continuity equation in discrete form, assuming a staggered
+ grid, we have
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\frac{\partial u}{\partial x}+\frac{\partial\varv}{\partial y}+\frac{\partial w}{\partial z}\approx\frac{u(x+\tfrac{\Delta x}{2},y,z)-u(x-\tfrac{\Delta x}{2},y,z)}{\Delta x}+\frac{\varv(x,y+\tfrac{\Delta y}{2},z)-\varv(x,y-\tfrac{\Delta y}{2},z)}{\Delta y}+\frac{w(x,y,z+\tfrac{\Delta z}{2})-w(x,y,z-\tfrac{\Delta z}{2})}{\Delta z}
+\end{equation}
+
+\end_inset
+
+Here, for example,
+\begin_inset Formula 
+\begin{equation}
+u(x+\tfrac{\Delta x}{2},y,z)=\sum_{m=1}^{M}q_{m}\cos(k_{m,x}(x+\tfrac{\Delta x}{2})+k_{m,y}y+k_{m,z}z-\psi_{m})\sigma_{m,x}
+\end{equation}
+
+\end_inset
+
+Upon careful substitution and tedious trigonometric operations (which are
+ rendered begnin when using mathematica, bless Stephen Wolfram), we recover
+ the following
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\frac{\partial u}{\partial x}+\frac{\partial\varv}{\partial y}+\frac{\partial w}{\partial z}\approx-\sum_{m=1}^{M}2\left[\frac{\sigma_{m,x}}{\Delta x}\sin(\tfrac{1}{2}k_{m,x}\Delta x)+\frac{\sigma_{m,y}}{\Delta y}\sin(\tfrac{1}{2}k_{m,y}\Delta y)+\frac{\sigma_{m,z}}{\Delta z}\sin(\tfrac{1}{2}k_{m,z}\Delta z)\right]\sin(\mathbf{k}_{m}\cdot\mathbf{x}-\psi_{m})
+\end{equation}
+
+\end_inset
+
+or, written in a more convenient form
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\frac{\partial u}{\partial x}+\frac{\partial\varv}{\partial y}+\frac{\partial w}{\partial z}\approx-\sum_{m=1}^{M}\boldsymbol{\sigma}_{m}\cdot\tilde{\mathbf{k}}_{m}\sin(\mathbf{k}_{m}\cdot\mathbf{x}-\psi_{m})\label{eq:continuity-discrete}
+\end{equation}
+
+\end_inset
+
+where
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\tilde{\mathbf{k}}_{m}\equiv\frac{2}{\Delta x}\sin(\tfrac{1}{2}k_{m,x}\Delta x)\mathbf{i}+\frac{2}{\Delta y}\sin(\tfrac{1}{2}k_{m,y}\Delta y)\mathbf{j}+\frac{2}{\Delta z}\sin(\tfrac{1}{2}k_{m,z}\Delta z)\mathbf{k}
+\end{equation}
+
+\end_inset
+
+A sufficient condition for the discrete continuity equation given in 
+\begin_inset CommandInset ref
+LatexCommand formatted
+reference "eq:continuity-discrete"
+
+\end_inset
+
+ to be zero is to make
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\boldsymbol{\sigma}_{m}\cdot\tilde{\mathbf{k}}_{m}=0,\quad\forall m
+\end{equation}
+
+\end_inset
+
+This means that instead of selecting 
+\begin_inset Formula $\boldsymbol{\sigma}_{m}$
+\end_inset
+
+ such that it is perpendicular to 
+\begin_inset Formula $\mathbf{k}_{m}$
+\end_inset
+
+(
+\begin_inset Formula $\boldsymbol{\sigma}_{m}\cdot\mathbf{k}_{m}=0$
+\end_inset
+
+), we instead choose 
+\begin_inset Formula $\boldsymbol{\sigma}_{m}$
+\end_inset
+
+to be perpendicular to 
+\begin_inset Formula $\tilde{\mathbf{k}}_{m}$
+\end_inset
+
+.
+ Interestingly, in the limit as the grid spacing approaches zero, 
+\begin_inset Formula $\tilde{\mathbf{k}}_{m}$
+\end_inset
+
+ will approach 
+\begin_inset Formula $\mathbf{k}_{m}$
+\end_inset
+
+.
+ This is so cool!
+\end_layout
+
+\begin_layout Section
+In Practice
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figures/pdf/angles.pdf
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Angles associated with wave number 
+\begin_inset Formula $\mathbf{k}_{m}$
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Specify the number of modes 
+\begin_inset Formula $M$
+\end_inset
+
+.
+ This will determine the Fourier representation of the velocity field at
+ every point in the spatial domain 
+\end_layout
+
+\begin_layout Itemize
+Compute or set a minimum wave number 
+\begin_inset Formula $k_{0}$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Itemize
+Compute a maximum wave number 
+\begin_inset Formula $k_{\text{max }}=\frac{\pi}{\Delta x}$
+\end_inset
+
+.
+ For multiple dimensions, use 
+\begin_inset Formula $k_{\text{max}}=\max(\frac{\pi}{\Delta x},\frac{\pi}{\Delta y},\frac{\pi}{\Delta z})$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Itemize
+Generate a list of 
+\begin_inset Formula $M$
+\end_inset
+
+ modes: 
+\begin_inset Formula $k_{m}\equiv k(m)=k_{0}+\frac{k_{\text{max}}-k_{\text{0}}}{M}(m-1)$
+\end_inset
+
+.
+ Those will correspond to the magnitude of the vector 
+\begin_inset Formula $\mathbf{k}_{m}$
+\end_inset
+
+.
+ In other words, 
+\begin_inset Formula $k_{m}$
+\end_inset
+
+ is the radius of a sphere.
+ 
+\end_layout
+
+\begin_layout Itemize
+Generate four arrays of random numbers, each of which is of size M (those
+ will be needed next).
+ Those will correspond to the angles: 
+\begin_inset Formula $\theta_{m}$
+\end_inset
+
+, 
+\begin_inset Formula $\varphi_{m}$
+\end_inset
+
+, 
+\begin_inset Formula $\psi_{m}$
+\end_inset
+
+, and 
+\begin_inset Formula $\alpha_{m}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+Compute the wave vectors.
+ To generate as much randomness as possible, we write the wave vector as
+ a function of two angles in 3D space.
+ This means
+\begin_inset Newline newline
+\end_inset
+
+ 
+\begin_inset Formula 
+\begin{equation}
+k_{x,m}=\sin(\theta_{m})\cos(\varphi_{m})k_{m}
+\end{equation}
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+k_{y,m}=\sin(\theta_{m})\sin(\varphi_{m})k_{m}
+\end{equation}
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+k_{x,m}=\cos(\theta_{m})k_{m}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Compute the unit vector 
+\begin_inset Formula $\boldsymbol{\sigma}_{m}$
+\end_inset
+
+.
+ Note that 
+\begin_inset Formula $\boldsymbol{\sigma}_{m}$
+\end_inset
+
+ lies in a plane perpendicular to the vector 
+\begin_inset Formula $\mathbf{k}_{m}$
+\end_inset
+
+.
+ We choose the following
+\begin_inset Newline newline
+\end_inset
+
+ 
+\begin_inset Formula 
+\begin{equation}
+\sigma_{x,m}=\cos(\theta_{m})\cos(\varphi_{m})\cos(\alpha_{m})-\sin(\varphi_{m})\sin(\alpha_{m})
+\end{equation}
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+\sigma_{y,m}=\cos(\theta_{m})\sin(\varphi_{m})\cos(\alpha_{m})+\cos(\varphi_{m})\sin(\alpha_{m})
+\end{equation}
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+\sigma_{z,m}=-\sin(\theta_{m})\cos(\alpha_{m})
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+To enforce continuity, compute vector 
+\begin_inset Formula $\tilde{\mathbf{k}}_{m}$
+\end_inset
+
+ and make 
+\begin_inset Formula $\boldsymbol{\sigma}_{m}$
+\end_inset
+
+ perpendicular to 
+\begin_inset Formula $\tilde{\mathbf{k}}_{m}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+Once those quantities are computed, loop over the mesh.
+ For every point on the mesh, loop over all M modes.
+ For every mode, compute 
+\begin_inset Formula $q_{m}=2\sqrt{E(k_{m})\Delta k}$
+\end_inset
+
+ and 
+\begin_inset Formula $\beta_{m}=\mathbf{k}_{m}\cdot\mathbf{x}-\psi_{m}$
+\end_inset
+
+.
+ Finally, construct the following summations (at every point 
+\begin_inset Formula $(x,y,z)$
+\end_inset
+
+ you will have a summation of 
+\begin_inset Formula $M$
+\end_inset
+
+-modes)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+u(x,y,z)=\sum_{n=1}^{M}q_{m}\cos(\beta_{m})\sigma_{x,m}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\varv(x,y,z)=\sum_{n=1}^{M}q_{m}\cos(\beta_{m})\sigma_{y,m}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+w(x,y,z)=\sum_{n=1}^{M}q_{m}\cos(\beta_{m})\sigma_{z,m}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "references"
+options "plain"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
