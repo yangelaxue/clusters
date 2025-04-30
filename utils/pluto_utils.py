@@ -74,3 +74,40 @@ def load_HDF5data(f_name, *var):
                 out.append(0) # Return 0 to ensure all variables are in the same order.
 
     return out
+
+def get_units(f_name):
+    """
+    Retrieve the scaling units from the file named definitions.h
+    These scaling units are L_0, v_0 and rho_0, all listed in cgs units.
+    If these units aren't found, default to 1.
+
+    Parameters
+    ----------
+        f_name : str
+            File name (and location) of definitions.h file to search within.
+    
+    Returns
+    -------
+        L_0, v_0, rho_0 : float
+            The units scaling units used by PLUTO.
+    """
+
+    L_bool, v_bool, rho_bool = 0, 0, 0
+
+    with open(f_name, 'r') as f:
+        for line in f.readlines():
+            if line.startswith('#define UNIT_LENGTH'):
+                L_0 = float(line.split('//')[0].split('UNIT_LENGTH')[1])
+                L_bool = 1
+            elif line.startswith('#define UNIT_VELOCITY'):
+                v_0 = float(line.split('//')[0].split('UNIT_VELOCITY')[1])
+                v_bool = 1
+            elif line.startswith('#define UNIT_DENSITY'):
+                rho_0 = float(line.split('//')[0].split('UNIT_DENSITY')[1])
+                rho_bool = 1
+
+    L_0 = L_0 if L_bool else 1.
+    v_0 = v_0 if v_bool else 1.
+    rho_0 = rho_0 if rho_bool else 1.
+
+    return L_0, v_0, rho_0
