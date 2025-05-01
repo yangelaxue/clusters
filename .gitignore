@@ -8,11 +8,12 @@
 *.pdf
 *.mp4
 
+# c and c++ executables
+*.h.gch
+*.out
 
-#AST5220-Cosmology/
-#TurboGenPY/
-
-
+# VSCode
+*/.vscode/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
