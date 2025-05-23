@@ -10,15 +10,104 @@ Author: Angela Xue
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import animation
-import os
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-#%% Begin.
+#################
+#%% Default Class
+#################
 
-def get_list2D(var_list,dim=0):
+class PlutoPlots:
     """
-    From list of 3D arrays, return a list of 2D arrays from a specified slice dim.
+    Define default matplitlib settings for PLUTO plots.
     """
-    return [_var[dim] for _var in var_list] if var_list[dim].ndim==3 else var_list
+
+    kwargs = {
+        # Axes
+        'XY' : None,
+        # Labels
+        'title' : None,
+        'xlabel' : None,
+        'ylabel' : None,
+        # Cbar
+        'vmin' : None,
+        'vmax' : None,
+        'cbar:cmap' : 'plasma',
+        'cbar:label' : None,
+        'cbar:size' : .2,
+        'cbar:pad' : .2,
+        'cbar:loc' : 'right',
+        # Plots
+        'figsize' : (6,6),
+        'save_dir' : './movie.mp4',
+        'interval' : 300,
+    }
+
+    def set_style(self,):
+
+        from matplotlib import rc
+        rc('font', **{'family': 'serif', 'serif': ['Computer Modern'], 'size': 10})
+        rc('text', usetex=True)
+        rc('axes', **{'titlesize': 10})
+
+        plt.rcParams['axes.axisbelow'] = True
+
+    def get_XY(self,shape):
+        """
+        Generate a default meshgrid.
+        """
+        X, Y = np.meshgrid(np.linspace(0,1.,shape[0]), np.linspace(0,1.,shape[1]), indexing='xy')
+        self.kwargs['XY'] = X, Y
+
+
+def get_cbar(im,fig,ax,**_kwargs):
+    """
+    Return a cbar of the same size as the plot.
+    """
+
+    pp = PlutoPlots()
+    pp.kwargs.update(_kwargs)
+
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes(pp.kwargs['cbar:loc'], size=pp.kwargs['cbar:size'], pad=pp.kwargs['cbar:pad'])
+    cbar = fig.colorbar(im,cax=cax)
+    return cbar
+    
+def get_fig_ax(**_kwargs):
+
+    pp = PlutoPlots()
+    pp.kwargs.update(_kwargs)
+
+    fig, ax = plt.subplots(1,1,figsize=pp.kwargs['figsize'],tight_layout=True)
+    
+    ax.set_aspect('equal')
+    ax.set_xlabel(pp.kwargs['x_label'])
+    ax.set_ylabel(pp.kwargs['y_label'])
+
+
+    return fig, ax
+
+####################
+#%% Helper Functions
+####################
+
+def get_list2D(var_list,s=0):
+    """
+    From list of 3D arrays, return a list of 2D arrays from a specified slice s.
+    """
+    return [_var[s] for _var in var_list] if var_list[0].ndim==3 else var_list
+
+# def set_plot(**_kwargs):
+
+#     pp = PlutoPlots()
+#     kwargs = pp.kwargs
+#     kwargs.update(_kwargs)
+
+#     fig, ax = plt.subplots(1,1,figsize=pp.kwargs['figsize'],tight_layout=True)
+
+
+############
+#%% Animate!
+############
 
 def animate_vars(var_list, **_kwargs):
     """
@@ -28,56 +117,36 @@ def animate_vars(var_list, **_kwargs):
     ----------
         var_list : list
             Time ordered list of 2D arrays which are to be plotted.
-        kwargs
+        _kwargs
             Keyword arguments to specify the appearence of the animation.
-            title : str - title shown on the top of the animation.
-            XY : tuple - X and Y coordinates of the same shape of the variables.
-            vmin, vmax : float - respectively, the minimum and maximum numbers to be shown throughout the animation.
-            figsize : tuple - size in inches of the animation.
-            cmap : str - colors used to plot the variables.
-            save_dir : str - where and name of the output movie.
-    """
-
-    kwargs = {
-        'title' : None,
-        'XY' : None,
-        'vmin' : None,
-        'vmax' : None,
-        'figsize' : (6,6),
-        'cmap' : 'plasma',
-        'save_dir' : "./movie.mp4",
-        'cbar_label' : None
-    }
-    kwargs.update(_kwargs)
-
-    title = kwargs['title']
-    XY = kwargs['XY']
-    if XY:
-        X, Y = XY
-    else:
-        X, Y = np.meshgrid(np.arange(0,var_list[0].shape[0]), np.arange(0,var_list[0].shape[1]), indexing='xy')
-    vmin, vmax = kwargs['vmin'], kwargs['vmax']
-    cmap = kwargs['cmap']
-    figsize = kwargs['figsize']
-    save_dir = kwargs['save_dir']
+            See PlutoPlots.
+        """
     
-    fig, ax = plt.subplots(1,1,figsize=figsize,tight_layout=True)
+    pp = PlutoPlots()
+    pp.kwargs.update(_kwargs)
     
-    ax.set_title(f"{title}")
+    if not pp.kwargs['XY']:
+        pp.get_XY(var_list[0].shape)
+    X, Y = pp.kwargs['XY']
+    
+    fig, ax = plt.subplots(1,1,figsize=pp.kwargs['figsize'],tight_layout=True)
+
     ax.set_aspect('equal')
     
     ims = []
     for i in range(len(var_list)):
-        mesh = ax.pcolormesh(X, Y, var_list[i], animated=True, cmap=cmap, vmin=vmin, vmax=vmax)
-        ims.append([mesh])
+        im = ax.pcolormesh(X, Y, var_list[i], animated=True, cmap=pp.kwargs['cmap'], vmin=pp.kwargs['vmin'], vmax=pp.kwargs['vmax'])
+        ims.append([im])
     
-    if vmin!=None and vmax!=None:
-        fig.colorbar(mesh,shrink=.8,label=kwargs['cbar_label'])
+    if pp.kwargs['vmin']!=None and pp.kwargs['vmax']!=None:
+        cbar = get_cbar(im,fig,ax)
+        if pp.kwargs['cbar_label']:
+            cbar.set_label(pp.kwargs['cbar_label'])
     
-    ani = animation.ArtistAnimation(fig, ims, interval=300)
-    ani.save(save_dir,dpi=150)
+    ani = animation.ArtistAnimation(fig, ims, interval=pp.kwargs['interval'])
+    ani.save(pp.kwargs['save_dir'],dpi=150)
 
-def animate_vfield(vx1_list, vx2_list, **_kwargs):
+def animate_vfield(vx1_list, vx2_list, intv:int=1, **_kwargs):
     """
     Animates a 2D field.
 
@@ -93,40 +162,30 @@ def animate_vfield(vx1_list, vx2_list, **_kwargs):
             figsize : tuple - size in inches of the animation.
             save_dir : str - where and name of the output movie.
     """
-
-    kwargs = {
-        'title' : None,
-        'XY' : None,
-        'intv' : 4,
-        'figsize' : (6,6),
-        'save_dir' : "./movie.mp4",
-    }
-    kwargs.update(_kwargs)
-
-    title = kwargs['title']
-    XY = kwargs['XY']
-    if XY:
-        X, Y = XY
-    else:
-        X, Y = np.meshgrid(np.arange(0,vx1_list[0].shape[0]), np.arange(0,vx1_list[0].shape[1]), indexing='xy')
-    intv = kwargs['intv']
-    figsize = kwargs['figsize']
-    save_dir = kwargs['save_dir']
     
-    fig, ax = plt.subplots(1,1,figsize=figsize,tight_layout=True)
+    pp = PlutoPlots
+    pp.kwargs.update(_kwargs)
     
-    ax.set_title(f"{title}")
+    if not pp.kwargs['XY']:
+        pp.get_XY(vx1_list[0].shape)
+    X, Y = pp.kwargs['XY']
+    
+    fig, ax = plt.subplots(1,1,figsize=pp.kwargs['figsize'],tight_layout=True)
+    
     ax.set_aspect('equal')
+    ax.set_title(f"{pp.kwargs['title']}")
+    ax.set_xlabel(f"{pp.kwargs['xlabel']}")
+    ax.set_ylabel(f"{pp.kwargs['ylabel']}")
     
     ims = []
     for i in range(len(vx1_list)):
         im = ax.quiver(X[::intv,::intv], Y[::intv,::intv], vx1_list[i][::intv,::intv] ,vx2_list[i][::intv,::intv], animated=True)
         ims.append([im])
     
-    ani = animation.ArtistAnimation(fig, ims, interval=300)
-    ani.save(save_dir,dpi=150)
+    ani = animation.ArtistAnimation(fig, ims, interval=pp.kwargs['interval'])
+    ani.save(pp.kwargs['save_dir'],dpi=150)
 
-def animate_vstream(vx1_list, vx2_list, **_kwargs):
+def animate_vstream(vx1_list, vx2_list, density, **_kwargs):
 
     # TODO: this doesn't work.
 
@@ -146,30 +205,21 @@ def animate_vstream(vx1_list, vx2_list, **_kwargs):
             save_dir : str - where and name of the output movie.
     """
 
-    kwargs = {
-        'title' : None,
-        'XY' : None,
-        'intv' : 4,
-        'figsize' : (6,6),
-        'save_dir' : "./movie.mp4",
-    }
-    kwargs.update(_kwargs)
-
-    title = kwargs['title']
-    XY = kwargs['XY']
-    if XY:
-        X, Y = XY
-    else:
-        X, Y = np.meshgrid(np.arange(0,vx1_list[0].shape[0]), np.arange(0,vx1_list[0].shape[1]), indexing='xy')
-    figsize = kwargs['figsize']
-    save_dir = kwargs['save_dir']
+    pp = PlutoPlots
+    pp.kwargs.update(_kwargs)
     
-    fig, ax = plt.subplots(1,1,figsize=figsize,tight_layout=True)
+    if not pp.kwargs['XY']:
+        pp.get_XY(vx1_list[0].shape)
+    X, Y = pp.kwargs['XY']
     
-    ax.set_title(f"{title}")
+    fig, ax = plt.subplots(1,1,figsize=pp.kwargs['figsize'],tight_layout=True)
+    
     ax.set_aspect('equal')
+    ax.set_title(f"{pp.kwargs['title']}")
+    ax.set_xlabel(f"{pp.kwargs['xlabel']}")
+    ax.set_ylabel(f"{pp.kwargs['ylabel']}")
 
-    stream = ax.streamplot(X,Y,vx1_list[0], vx2_list[0], density=2)
+    stream = ax.streamplot(X,Y,vx1_list[0], vx2_list[0], density=density)
 
     def animate(i):
         ax.collections = [] # clear lines streamplot
@@ -187,5 +237,5 @@ def animate_vstream(vx1_list, vx2_list, **_kwargs):
     #     im = ax.streamplot(X, Y, vx1_list[i] ,vx2_list[i])
     #     ims.append([im])
     
-    ani = animation.FuncAnimation(fig, animate, interval=300)
-    ani.save(save_dir,dpi=150)
+    ani = animation.FuncAnimation(fig, animate, interval=pp.kwargs['interval'])
+    ani.save(pp.kwargs['save_dir'],dpi=150)

@@ -614,12 +614,12 @@ class TurbGen
         /*
         Returns a uniform random variable with unit variance.
         */
-        double r1 = ran1(&seed);
-        double r2 = ran1(&seed);
+        double r1 = ran1s(&seed);
+        double r2 = ran1s(&seed);
         double g1 = sqrt(2.*log(1./r1)) * cos(2.*M_PI*r2);
         return g1;
     }
-    private: double ran1(int *idum) {
+    private: double ran1s(int *idum) {
         /*
         Uniform random number generator.
         Will generate a sequence of random numbers with the same seed,
