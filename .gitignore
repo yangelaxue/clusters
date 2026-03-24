@@ -1,3 +1,13 @@
+# temp files
 _*
+
+# Jupyter Notebooks
 .ipynb_checkpoints
+*.ipynb
+
+# virtual environment
 venv
+
+# Derived plots
+visualisation/
+*.png
