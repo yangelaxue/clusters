@@ -11,3 +11,7 @@ venv
 # Derived plots
 visualisation/
 *.png
+
+# Slurm jobs
+*.sl
+slurm*
