@@ -189,5 +189,5 @@ if __name__=="__main__":
                 centre = (IA2.dim//c//2,) * 3
                 warning = "not through cluster centre"
 
-        # plot_raw(s)
+        plot_raw(s)
         plot_derived(s)

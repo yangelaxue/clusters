@@ -175,4 +175,4 @@ if __name__=="__main__":
         x, y = (np.linspace(0,L,IA2.dim),) * 2
 
         plot_raw(s)
-        # plot_derived(s)
+        plot_derived(s)
