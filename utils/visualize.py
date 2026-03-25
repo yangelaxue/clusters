@@ -165,7 +165,7 @@ class DefaultStyle:
             })
         elif varName.startswith('B'):
             kwargs.update({
-                'cbar_cmap' : cmr.viola,
+                'cbar_cmap' : cmr.wildfire,
                 # 'units' : 'arb. units',
             })
             if varName in {'Bx1','Bx'}:
