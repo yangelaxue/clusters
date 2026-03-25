@@ -33,6 +33,8 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import os
 
+import cmasher as cmr
+
 # Style class
 
 class DefaultStyle:
@@ -163,7 +165,7 @@ class DefaultStyle:
             })
         elif varName.startswith('B'):
             kwargs.update({
-                'cbar_cmap' : 'managua',
+                'cbar_cmap' : cmr.viola,
                 # 'units' : 'arb. units',
             })
             if varName in {'Bx1','Bx'}:
