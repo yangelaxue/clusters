@@ -181,7 +181,6 @@ if __name__=="__main__":
         warning = None
         if slc==None:
             try:
-                error
                 centre = ia2.get_centre(snapshot=s,c=c)
                 with open(os.path.join(Path,"centre.txt"),"a") as f:
                     f.write(f"{s} {c} {centre}\n")
