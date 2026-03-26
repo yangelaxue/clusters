@@ -7,7 +7,7 @@ Inputs are:
         List of snapshots which to create an animation from.
         Must be 'all' or list of integers.
     los (optional)
-        Along which line of sight should a slice be taken.
+        Along which line of sight should a projection be taken.
     L_0 (optional)
         Length unit along the x and y axes.
     t_0 (optional)
@@ -33,7 +33,8 @@ def plot(val,varName,snapshot,vmin=None,vmax=None,norm=None,cbar_label=None):
     cbar = get_cbar(im,fig,ax)
     cbar.ax.set_title(cbar_label,loc='left')
 
-    plt.savefig(os.path.join(savePath,f'{varName}_{snapshot}_projection_los{los}.png'))
+    plt.savefig(os.path.join(savePath,f'{varName}_{snapshot}_projection_los{los}.png'),dpi=DefaultStyle.figkwargs['dpi'])
+    plt.close()
 
 def plot_raw(snapshot):
     """ Animate all the raw fields. """
@@ -55,15 +56,17 @@ def plot_raw(snapshot):
             val *= (1+z)**3
             cbar_label = r'$m_{\rm P}/{\rm cm}^3\times{\rm cm}$'
             norm = colors.LogNorm()
-        if field=='Temperature':
+        elif field=='Temperature':
             cbar_label = r'K$\times{\rm cm}$'
-        if 'velocity' in field:
-            val /= 1e5
-            cbar_label=r'km/s$\times{\rm cm}$'
-        if field in ('Bx','By','Bz'):
-            val /= 1e-6
-            val *= (1+z)**2
-            cbar_label = r'$\mu{\rm B}\times{\rm cm}$'
+        # elif 'velocity' in field:
+        #     val /= 1e5
+        #     cbar_label=r'km/s$\times{\rm cm}$'
+        # elif field in ('Bx','By','Bz'):
+        #     val /= 1e-6
+        #     val *= (1+z)**2
+        #     cbar_label = r'$\mu{\rm B}\times{\rm cm}$'
+        else:
+            continue
 
         vmin, vmax = None, None
         if field in ('x-velocity','y-velocity','z-velocity','Bx','By','Bz'):
@@ -123,7 +126,7 @@ if __name__=="__main__":
     parser = argparse.ArgumentParser("main")
     parser.add_argument("Path", help="Path to PLUTO data.", type=str)
     parser.add_argument("-snapshots", help="Which snapshots to animate.",required=False)
-    parser.add_argument("-los", help="Which line-of-sight to plot a slice from.",required=False)
+    parser.add_argument("-los", help="Which line-of-sight to plot a projection from.",required=False)
     parser.add_argument("-L_0", help="Langth unit to plot.", type=int,required=False)
     # parser.add_argument("-t_0", help="Time unit to plot.", type=int,required=False)
 

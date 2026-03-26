@@ -37,7 +37,8 @@ def plot(val,varName,snapshot,vmin=None,vmax=None,norm=None,cbar_label=None):
     cbar = get_cbar(im,fig,ax)
     cbar.ax.set_title(cbar_label,loc='left')
 
-    plt.savefig(os.path.join(savePath,f'{varName}_{snapshot}_slice_los{los}.png'))
+    plt.savefig(os.path.join(savePath,f'{varName}_{snapshot}_slice_los{los}.png'),dpi=DefaultStyle.figkwargs['dpi'])
+    plt.close()
 
 def plot_raw(snapshot):
     """ Animate all the raw fields. """
