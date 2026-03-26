@@ -41,7 +41,9 @@ def get_mach_rms(vx1,vx2=None,vx3=None,subtract_mean=False,normalise=0,**kwargs)
     
     Returns
     -------
-    v_rms or mach_rms : float
+    v_rms : float
+    OR
+    mach_rms & c_s : float
     """
 
     # Ensure all arrays are of the same shape.
@@ -70,7 +72,7 @@ def get_mach_rms(vx1,vx2=None,vx3=None,subtract_mean=False,normalise=0,**kwargs)
             prs = kwargs['prs']
             gamma = kwargs['gamma'] if 'gamma' in kwargs.keys() else 5/3 # Default to 5/3
         except:
-            raise ValueError("Must provide rho and prs value to normalise against sound speed.")
+            raise KeyError("Must provide rho and prs value to normalise against sound speed.")
         
         assert vx1.shape==rho.shape, "Shapes of rho and vx1 must match."
         assert vx1.shape==prs.shape, "Shapes of prs and vx1 must match."
@@ -83,7 +85,7 @@ def get_mach_rms(vx1,vx2=None,vx3=None,subtract_mean=False,normalise=0,**kwargs)
             mach_rms = np.mean(v**2/c_s**2)**.5
         else:
             raise NotImplementedError(f"Parameter normalise must be set to 0, 1 or 2.")
-        return mach_rms
+        return mach_rms, c_s.mean()
 
 def get_c_s(rho,prs,gamma=5/3):
     """ Calculate average adiabatic sound speed in a field. """
