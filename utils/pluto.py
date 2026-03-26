@@ -213,28 +213,7 @@ class PlutoData:
         hdf5Name = self.hdf5Names[0]
         return read_hdf5(hdf5Name,'X')
     
-    def gen_vals(self,varName,snapshots='all',**kwargs):
-        """
-        Set a generator for specified variable at specified snapshot(s).
-
-        Parameters
-        ----------
-            var : str
-                Name of the variable to be loaded.
-            snapshots : str, int, arraylike
-                List of snapshots to load variables from. If 'all', return all snapshots.
-        """
-
-        snapshots = [snapshots] if type(snapshots)==int else snapshots
-
-        hdf5Names = self.hdf5Names
-        if snapshots!='all':
-            assert type(snapshots)==list, "snapshots needs to be a list of integers"
-            hdf5Names = [self.hdf5Names[s] for s in snapshots]
-        
-        return (read_hdf5(hdf5Name,varName,**kwargs) for hdf5Name in hdf5Names)
-    
-    def get_vals(self,varName,snapshots='all',**kwargs):
+    def get_vals(self,varName:str,snapshots='all',units='code',**kwargs):
         """
         Return specified variable at specified snapshot(s).
         """
@@ -245,8 +224,41 @@ class PlutoData:
         if snapshots!='all':
             assert type(snapshots)==list, "snapshots needs to be a list of integers"
             hdf5Names = [self.hdf5Names[s] for s in snapshots]
+
+        if units.lower()=='code':
+            const = 1.
+        elif units.lower()=='cgs':
+            if varName=='rho':
+                const = self.rho_0
+            elif varName=='prs':
+                const = self.p_0
+            elif varName.startswith('vx'):
+                const = self.v_0
+            elif varName.startswith('Bx'):
+                const = self.B_0
+            else:
+                raise NameError(f'Field value with name {varName} does not exist.')
+        else:
+            raise NotImplementedError("Class can only return field values in code or CGS units.")
         
-        return [read_hdf5(hdf5Name,varName,**kwargs) for hdf5Name in hdf5Names]
+        
+        return [read_hdf5(hdf5Name,varName,**kwargs)*const for hdf5Name in hdf5Names]
+    
+    
+    def gen_vals(self,varName,snapshots='all',**kwargs):
+        """
+        Set a generator for specified variable at specified snapshot(s).
+
+        Parameters
+        ----------
+            See self.get_vals
+        """
+
+        snapshots = [snapshots] if type(snapshots)==int else snapshots
+        if snapshots=='all':
+            snapshots = [i for i in range(len(self.hdf5Names))]
+        
+        return (self.get_vals(varName,snapshot,**kwargs)[0] for snapshot in snapshots)
 
 # Functions that can be used outside the class.
 
@@ -303,7 +315,7 @@ def read_hdf5(hdf5Name,varName,slc=-1,los=0,c=1):
     Returns
     -------
         ret : np.ndarray
-            List of the grid of variables returned in the same order as var.
+           Field values.
     """
 
     with h5py.File(hdf5Name, 'r') as f:
