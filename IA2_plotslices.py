@@ -178,7 +178,7 @@ if __name__=="__main__":
 
         x, y = (np.linspace(0,L,IA2.dim//c),) * 2
 
-        # Calculate slice to plot.
+        # Calculate and save slice to plot.
         warning = None
         if slc==None:
             try:

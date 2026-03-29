@@ -8,9 +8,10 @@ _*
 # virtual environment
 venv
 
-# Derived plots
+# Derived plots or files
 visualisation/
 *.png
+*.txt
 
 # Slurm jobs
 *.sl

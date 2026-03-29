@@ -1,5 +1,5 @@
 """
-Script to calculate the rms velocity and/or Mach number of a whole field, then plot.
+Script to calculate the rms velocity and/or Mach number of a whole field, then save and plot.
 
 Author: Angela Xue
 Date: March 2026
@@ -58,8 +58,13 @@ if __name__=="__main__":
         os.mkdir(savePath)
 
     times = pd.get_times(snapshots,t_0)
-    Machrms, c_s = get_vrms(True)
-    v_rms = Machrms * c_s
+    Mach_rms, c_s = get_vrms(True)
+    v_rms = Mach_rms * c_s
+
+    arr = np.array([pd.get_times(snapshots), v_rms, c_s, Mach_rms]).T
+
+    # Save to text file
+    np.savetxt(os.path.join(pd.Path,'vrms.txt'),arr,header='time v_rms c_s Mach_rms')
 
     # Plot root-mean-square velocity
     fig, ax = plt.subplots(figsize=DefaultStyle.figkwargs['figsize'],tight_layout=True)
@@ -78,7 +83,7 @@ if __name__=="__main__":
     # Plot turbulent Mach number
     fig, ax = plt.subplots(figsize=DefaultStyle.figkwargs['figsize'],tight_layout=True)
 
-    ax.plot(times,Machrms,marker='x')
+    ax.plot(times,Mach_rms,marker='x')
 
     ax.grid()
     ax.set_xlabel(f'Time ({t_0})')

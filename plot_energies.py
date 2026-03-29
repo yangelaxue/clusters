@@ -1,5 +1,6 @@
 """
 Script that sums the different energy components in a turbulent field.
+Saves and plots data.
 Inspired by Tulasi Parashar's script in TurbAn.
 
 Author: Angela Xue
@@ -74,6 +75,14 @@ if __name__=="__main__":
     if pd.PHYSICS in {'MHD','RMHD'}:
         eB = get_eB()
 
+    # Save energies to file.
+    if pd.PHYSICS in {'MHD','RMHD'}:
+        arr = np.array([pd.get_times(snapshots), ek, et, eB]).T
+        np.savetxt(os.path.join(pd.Path,'energies.txt'),arr,header='time et et eB')
+    else:
+        arr = np.array([pd.get_times(snapshots), ek, et]).T
+        np.savetxt(os.path.join(pd.Path,'energies.txt'),arr,header='time et et')
+
     # Plot energies
     fig, ax = plt.subplots(figsize=DefaultStyle.figkwargs['figsize'],tight_layout=True)
 
@@ -108,15 +117,3 @@ if __name__=="__main__":
     ax.legend(frameon=False)
 
     plt.savefig(os.path.join(savePath,f'energyfrac.png'),dpi=DefaultStyle.figkwargs['dpi'])
-    
-    # Save energies to file.
-    if pd.PHYSICS in {'MHD','RMHD'}:
-        with open(os.path.join(Path,"energies.txt"),"w") as f:
-            f.write("time ek ep eB\n")
-            for i, time in enumerate(times):
-                f.write(f"{time} {ek[i]} {et[i]} {eB[i]}")
-    else:
-        with open(os.path.join(Path,"energies.txt"),"w") as f:
-            f.write("time ek ep\n")
-            for i, time in enumerate(times):
-                f.write(f"{time} {ek[i]} {et[i]}")

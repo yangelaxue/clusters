@@ -1,5 +1,5 @@
 """
-Script to animate all raw and derived fields from a PLUTO simulation.
+Script to plot all raw and derived fields from a PLUTO simulation.
 
 Inputs are:
     Path
