@@ -151,6 +151,9 @@ if __name__=="__main__":
         raise NotImplementedError("Specified los must be in 0, x, X, 1, y, Y, 2, z, Z")
     L_0 = args.L_0 if args.L_0 else 'kpc'
 
+    if 'E3A' in os.getcwd().split('/')[-1] or 'E3A' in Path.split('/')[-1]:
+        IA2.dim = 1024
+
     ia2 = IA2Data(Path)
 
     savePath = os.path.join(Path,'visualise')

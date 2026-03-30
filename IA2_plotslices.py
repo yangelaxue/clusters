@@ -176,6 +176,9 @@ if __name__=="__main__":
         else:
             raise NotImplementedError('Does not account for prefixes other than k and M.')
 
+        if 'E3A' in os.getcwd().split('/')[-1] or 'E3A' in Path.split('/')[-1]:
+            IA2.dim = 1024
+
         x, y = (np.linspace(0,L,IA2.dim//c),) * 2
 
         # Calculate and save slice to plot.
