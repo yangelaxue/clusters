@@ -61,9 +61,8 @@ if __name__=="__main__":
     Mach_rms, c_s = get_vrms(True)
     v_rms = Mach_rms * c_s
 
-    arr = np.array([pd.get_times(snapshots), v_rms, c_s, Mach_rms]).T
-
     # Save to text file
+    arr = np.array([pd.get_times(snapshots), v_rms, c_s, Mach_rms]).T
     np.savetxt(os.path.join(pd.Path,'vrms.txt'),arr,header='time v_rms c_s Mach_rms')
 
     # Plot root-mean-square velocity
