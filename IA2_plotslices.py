@@ -137,13 +137,12 @@ def plot_derived():
 
 def save_centres(centres):
 
-    snaps, cs, cents = [], [], []
+    snaps, cents = [], []
     for s, centre in centres.items():
         snaps.append([s])
-        cs.append([c])
         cents.append(centre)
 
-    arr  = np.concatenate([snaps,cs,cents],axis=1)
+    arr  = np.concatenate([snaps,cents],axis=1)
     np.savetxt(centrefName,arr,header='snapshot c centre')
 
 if __name__=="__main__":
@@ -211,14 +210,14 @@ if __name__=="__main__":
             for s in snapshots:
                 for line in f:
                     if s in line:
-                        centres.update({s : line[2:]})
+                        centres.update({s : line[1:]})
                         continue
         # Calculate and save centres
         for s in snapshots:
             if s not in centres:
                 try:
-                    centre = ia2.get_centre(snapshot=s,c=c)
-                    centres.update({s : centre})
+                    centre = ia2.get_centre(snapshot=s,c=1)
+                    centres.update({s : centre//c})
                     save_centres(centres)
                 except:
                     pass
