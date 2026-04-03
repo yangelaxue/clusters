@@ -14,7 +14,7 @@ class IA2:
     cd = 2.66e-30
     cv = 6.47e9
     cb = (cd*4*np.pi)**.5 * cv
-    L = 3.95*1280 # comoving kpc
+    dL = 3.95 # comoving kpc
     dim = 1280
     gamma = 5/3
 

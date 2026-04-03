@@ -23,7 +23,7 @@ def plot(val,varName,snapshot,vmin=None,vmax=None,norm=None,cbar_label=None):
 
     # Define x and y values.
     z = get_redshift(snapshot)
-    L = IA2.L * CGS.pc / (1+z)
+    L = IA2.dL * IA2.dim * CGS.pc / (1+z)
     if 'pc' in L_0:
         L /= CGS.pc
     if L_0.startswith('k'):
