@@ -74,6 +74,7 @@ def plot_raw():
             
             z = get_redshift(s)
 
+            norm = None
             if 'Density' in field:
                 val /= CGS.mp
                 val *= (1+z)**3
