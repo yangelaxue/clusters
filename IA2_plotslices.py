@@ -100,9 +100,9 @@ def plot_raw():
 def plot_derived():
 
     # plot v^2 field
-    vxs = ia2.gen_vals('x-velocity',snapshot=snapshots,slcs=cents,los=los,c=c)
-    vys = ia2.gen_vals('y-velocity',snapshot=snapshots,slcs=cents,los=los,c=c)
-    vzs = ia2.gen_vals('z-velocity',snapshot=snapshots,slcs=cents,los=los,c=c)
+    vxs = ia2.gen_vals('x-velocity',snapshots=snapshots,slcs=cents,los=los,c=c)
+    vys = ia2.gen_vals('y-velocity',snapshots=snapshots,slcs=cents,los=los,c=c)
+    vzs = ia2.gen_vals('z-velocity',snapshots=snapshots,slcs=cents,los=los,c=c)
     for vx,vy,vz in zip(vxs,vys,vzs):
         try:
             v2 = vx**2 + vy**2 + vz**2
@@ -112,10 +112,10 @@ def plot_derived():
         plot(v2,'v2',s,0,None,None,'$v^2$ cgs units.')
 
     # plot ek field
-    rhos = ia2.gen_vals('Density',snapshot=snapshots,slcs=cents,los=los,c=c)
-    vxs = ia2.gen_vals('x-velocity',snapshot=snapshots,slcs=cents,los=los,c=c)
-    vys = ia2.gen_vals('y-velocity',snapshot=snapshots,slcs=cents,los=los,c=c)
-    vzs = ia2.gen_vals('z-velocity',snapshot=snapshots,slcs=cents,los=los,c=c)
+    rhos = ia2.gen_vals('Density',snapshots=snapshots,slcs=cents,los=los,c=c)
+    vxs = ia2.gen_vals('x-velocity',snapshots=snapshots,slcs=cents,los=los,c=c)
+    vys = ia2.gen_vals('y-velocity',snapshots=snapshots,slcs=cents,los=los,c=c)
+    vzs = ia2.gen_vals('z-velocity',snapshots=snapshots,slcs=cents,los=los,c=c)
     for rho,vx,vy,vz in zip(rhos,vxs,vys,vzs):
         try:
             ek = 0.5 * rho * (vx**2 + vy**2 + vz**2)
@@ -125,9 +125,9 @@ def plot_derived():
         plot(ek,'ek',s,0,None,None,'$v^2$ cgs units.')
 
     # Plot B2 field
-    Bxs = ia2.gen_vals('Bx',snapshot=snapshots,slcs=cents,los=los,c=c)
-    Bys = ia2.gen_vals('By',snapshot=snapshots,slcs=cents,los=los,c=c)
-    Bzs = ia2.gen_vals('Bz',snapshot=snapshots,slcs=cents,los=los,c=c)
+    Bxs = ia2.gen_vals('Bx',snapshots=snapshots,slcs=cents,los=los,c=c)
+    Bys = ia2.gen_vals('By',snapshots=snapshots,slcs=cents,los=los,c=c)
+    Bzs = ia2.gen_vals('Bz',snapshots=snapshots,slcs=cents,los=los,c=c)
     for Bx,By,Bz in zip(Bxs,Bys,Bzs):
         try:
             B2 = Bx**2 + By**2 + Bz**2
