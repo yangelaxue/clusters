@@ -12,7 +12,7 @@ Inputs are:
         Length unit along the x and y axes.
     t_0 (optional)
         Time unit to label.
-TODO Need to plot varticity and curlB
+TODO Need to plot vorticity and curlB
 """
 
 from scipy.integrate import trapezoid
@@ -21,16 +21,7 @@ def plot(val,varName,snapshot,vmin=None,vmax=None,norm=None,cbar_label=None):
 
     # Define x and y values.
     z = get_redshift(snapshot)
-    L = IA2.L * CGS.pc / (1+z)
-    if 'pc' in L_0:
-        L /= CGS.pc
-    if L_0.startswith('k'):
-        L /= 1e3
-    elif L_0.startswith('M'):
-        L /= 1e6
-    else:
-        raise NotImplementedError('Does not account for prefixes other than k and M.')
-    x, y = (np.linspace(0,L,IA2.dim),) * 2
+    x, y = (np.linspace(0,L / (1+z),IA2.dim),) * 2
 
     # Start plotting.
     cmap = DefaultStyle.get_varkwargs(varName)['cbar_cmap']
@@ -89,17 +80,7 @@ def plot_raw():
             print(f"Plotting {field} for snapshot {s}.")
 
             z = get_redshift(s)
-            L = IA2.L * CGS.pc / (1+z)
-            if 'pc' in L_0:
-                L /= CGS.pc
-            if L_0.startswith('k'):
-                L /= 1e3
-            elif L_0.startswith('M'):
-                L /= 1e6
-            else:
-                raise NotImplementedError('Does not account for prefixes other than k and M.')
-
-            val = trapezoid(val,dx=L,axis=los)
+            val = trapezoid(val,dx=IA2.dL*CGS.pc/(1+z),axis=los)
             
             vmin, vmax = None, None
             if field in ('x-velocity','y-velocity','z-velocity','Bx','By','Bz'):
@@ -108,81 +89,46 @@ def plot_raw():
 
             plot(val,field,s,vmin,vmax,norm,cbar_label)
 
-
-
-# def plot_raw(snapshot):
-#     """ Animate all the raw fields. """
-
-#     for field in IA2.fields:
-
-#         norm = None
-
-#         try: # Check if we have the file downloaded.
-#             val = ia2.get_val(field,snapshot=snapshot,redshift=z)
-#         except:
-#             print(f'... skipping plotting {field} for snapshot {snapshot} ...')
-#             continue
-
-#         print(f"Plotting {field} for snapshot {snapshot}.")
-#         # Plot everything in predetermined units.
-#         if 'Density' in field:
-#             val /= CGS.mp
-#             val *= (1+z)**3
-#             cbar_label = r'$m_{\rm P}/{\rm cm}^3\times{\rm cm}$'
-#             norm = colors.LogNorm()
-#         elif field=='Temperature':
-#             cbar_label = r'K$\times{\rm cm}$'
-#         # elif 'velocity' in field:
-#         #     val /= 1e5
-#         #     cbar_label=r'km/s$\times{\rm cm}$'
-#         # elif field in ('Bx','By','Bz'):
-#         #     val /= 1e-6
-#         #     val *= (1+z)**2
-#         #     cbar_label = r'$\mu{\rm B}\times{\rm cm}$'
-#         else:
-#             continue
-
-#         vmin, vmax = None, None
-#         if field in ('x-velocity','y-velocity','z-velocity','Bx','By','Bz'):
-#             vmax = np.max(np.abs(val))
-#             vmin = -vmax
-
-#         val = trapezoid(val,dx=L/IA2.dim*CGS.pc,axis=los)
-
-#         plot(val,field,snapshot,vmin,vmax,norm,cbar_label)
-
 def plot_derived(snapshot):
 
     # Plot v^2 field
-    try: # Check if we have the file downloaded.
-        vx = ia2.get_val('x-velocity',snapshot=snapshot,redshift=z)
-        vy = ia2.get_val('y-velocity',snapshot=snapshot,redshift=z)
-        vz = ia2.get_val('z-velocity',snapshot=snapshot,redshift=z)
+    rhos = ia2.gen_vals('Density',snapshots=snapshots)
+    vxs = ia2.gen_vals('x-velocity',snapshots=snapshots)
+    vys = ia2.gen_vals('y-velocity',snapshots=snapshots)
+    vzs = ia2.gen_vals('z-velocity',snapshots=snapshots)
+    for s,rho,vx,vy,vz in zip(snapshots,rhos,vxs,vys,vzs):
+        try: # Check if we have the file downloaded.
+            v2 = vx**2 + vy**2 + vz**2
+        except:
+            print(f'... skipping plotting v2 for snapshot {snapshot} ...')
+            continue
         print(f"Plotting v2 for snapshot = {snapshot}")
-        v2 = vx**2 + vy**2 + vz**2
-        val = trapezoid(v2,dx=L/IA2.dim*CGS.pc,axis=los)
+        z = get_redshift(s)
+        val = trapezoid(v2,dx=IA2.dL*CGS.pc/(1+z),axis=los)
         plot(val,'v2',snapshot,0,None,None,'$v^2\times{\rm cm}$ cgs units.')
-    except:
-        print(f'... skipping plotting v2 for snapshot {snapshot} ...')
-    try:
-        rho = ia2.get_val('Density',snapshot=snapshot,redshift=z,slc=centre[los],los=los,c=c)
-        ek = 0.5 * rho * (vx**2 + vy**2 + vz**2)
+
+        try:
+            ek = 0.5 * rho * v2
+        except:
+            print(f'... skipping plotting ek for snapshot {snapshot} ...')
+            continue
         print(f"Plotting ek for snapshot = {snapshot}")
-        plot(ek,'ek',snapshot,0,None,None,'KE cgs units.')
-    except:
-        print(f'... skipping plotting ek for snapshot {snapshot} ...')
+        val = trapezoid(ek,dx=IA2.dL*CGS.pc/(1+z),axis=los)
+        plot(val,'ek',snapshot,0,None,None,'KE cgs units.')
 
     # Plot B^2 field
-    try:
-        Bx = ia2.get_val('Bx',snapshot=snapshot,redshift=z)
-        By = ia2.get_val('By',snapshot=snapshot,redshift=z)
-        Bz = ia2.get_val('Bz',snapshot=snapshot,redshift=z)
+    Bxs = ia2.gen_vals('Bx',snapshots=snapshots)
+    Bys = ia2.gen_vals('By',snapshots=snapshots)
+    Bzs = ia2.gen_vals('Bz',snapshots=snapshots)
+    for s,Bx,By,Bz in zip(snapshots,Bxs,Bys,Bzs):
+        try:
+            B2 = Bx**2 + By**2 + Bz**2
+        except:
+            print(f'... skipping plotting B2 for snapshot {snapshot} ...')
+            continue
         print(f"Plotting B2 for snapshot = {snapshot}")
-        B2 = Bx**2 + By**2 + Bz**2
-        val = trapezoid(B2,dx=L/IA2.dim*CGS.pc,axis=los)
+        val = trapezoid(B2,dx=IA2.dL*CGS.pc/(1+z),axis=los)
         plot(val,'B2',snapshot,0,None,None,'$B^2$ cgs units.')
-    except:
-        print(f'... skipping plotting B2 for snapshot {snapshot} ...')
 
 if __name__=="__main__":
 
@@ -228,18 +174,21 @@ if __name__=="__main__":
     if 'E3A' in os.getcwd().split('/')[-1] or 'E3A' in Path.split('/')[-1]:
         IA2.dim = 1024
 
+    L = IA2.dL * IA2.dim * CGS.pc
+    if 'pc' in L_0:
+        L /= CGS.pc
+    if L_0.startswith('k'):
+        L /= 1e3
+    elif L_0.startswith('M'):
+        L /= 1e6
+    else:
+        raise NotImplementedError('Does not account for prefixes other than k and M.')
+
     ia2 = IA2Data(Path)
 
     savePath = os.path.join(Path,'visualise')
     if not os.path.exists(savePath):
         os.mkdir(savePath)
 
-    with open(os.path.join(Path,"centre.txt"),"a") as f:
-        f.write("snapshot c centre\n")
-
-    for s in snapshots:
-
-        
-
-        plot_raw(s)
-        plot_derived(s)
+    plot_raw()
+    plot_derived()
