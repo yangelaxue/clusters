@@ -241,9 +241,7 @@ class PlutoData:
         else:
             raise NotImplementedError("Class can only return field values in code or CGS units.")
         
-        
         return [read_hdf5(hdf5Name,varName,**kwargs)*const for hdf5Name in hdf5Names]
-    
     
     def gen_vals(self,varName,snapshots='all',**kwargs):
         """
