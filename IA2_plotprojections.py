@@ -89,7 +89,7 @@ def plot_raw():
 
             plot(val,field,s,vmin,vmax,norm,cbar_label)
 
-def plot_derived(snapshot):
+def plot_derived():
 
     # Plot v^2 field
     rhos = ia2.gen_vals('Density',snapshots=snapshots)
@@ -100,21 +100,21 @@ def plot_derived(snapshot):
         try: # Check if we have the file downloaded.
             v2 = vx**2 + vy**2 + vz**2
         except:
-            print(f'... skipping plotting v2 for snapshot {snapshot} ...')
+            print(f'... skipping plotting v2 for snapshot {s} ...')
             continue
-        print(f"Plotting v2 for snapshot = {snapshot}")
+        print(f"Plotting v2 for snapshot = {s}")
         z = get_redshift(s)
         val = trapezoid(v2,dx=IA2.dL*CGS.pc/(1+z),axis=los)
-        plot(val,'v2',snapshot,0,None,None,'$v^2\times{\rm cm}$ cgs units.')
+        plot(val,'v2',s,0,None,None,'$v^2\times{\rm cm}$ cgs units.')
 
         try:
             ek = 0.5 * rho * v2
         except:
-            print(f'... skipping plotting ek for snapshot {snapshot} ...')
+            print(f'... skipping plotting ek for snapshot {s} ...')
             continue
-        print(f"Plotting ek for snapshot = {snapshot}")
+        print(f"Plotting ek for snapshot = {s}")
         val = trapezoid(ek,dx=IA2.dL*CGS.pc/(1+z),axis=los)
-        plot(val,'ek',snapshot,0,None,None,'KE cgs units.')
+        plot(val,'ek',s,0,None,None,'KE cgs units.')
 
     # Plot B^2 field
     Bxs = ia2.gen_vals('Bx',snapshots=snapshots)
@@ -124,11 +124,11 @@ def plot_derived(snapshot):
         try:
             B2 = Bx**2 + By**2 + Bz**2
         except:
-            print(f'... skipping plotting B2 for snapshot {snapshot} ...')
+            print(f'... skipping plotting B2 for snapshot {s} ...')
             continue
-        print(f"Plotting B2 for snapshot = {snapshot}")
+        print(f"Plotting B2 for snapshot = {s}")
         val = trapezoid(B2,dx=IA2.dL*CGS.pc/(1+z),axis=los)
-        plot(val,'B2',snapshot,0,None,None,'$B^2$ cgs units.')
+        plot(val,'B2',s,0,None,None,'$B^2$ cgs units.')
 
 if __name__=="__main__":
 
