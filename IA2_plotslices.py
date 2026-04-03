@@ -103,7 +103,7 @@ def plot_derived():
     vxs = ia2.gen_vals('x-velocity',snapshots=snapshots,slcs=cents,los=los,c=c)
     vys = ia2.gen_vals('y-velocity',snapshots=snapshots,slcs=cents,los=los,c=c)
     vzs = ia2.gen_vals('z-velocity',snapshots=snapshots,slcs=cents,los=los,c=c)
-    for vx,vy,vz in zip(vxs,vys,vzs):
+    for s,vx,vy,vz in zip(snapshots,vxs,vys,vzs):
         try:
             v2 = vx**2 + vy**2 + vz**2
         except:
@@ -116,7 +116,7 @@ def plot_derived():
     vxs = ia2.gen_vals('x-velocity',snapshots=snapshots,slcs=cents,los=los,c=c)
     vys = ia2.gen_vals('y-velocity',snapshots=snapshots,slcs=cents,los=los,c=c)
     vzs = ia2.gen_vals('z-velocity',snapshots=snapshots,slcs=cents,los=los,c=c)
-    for rho,vx,vy,vz in zip(rhos,vxs,vys,vzs):
+    for s,rho,vx,vy,vz in zip(snapshots,rhos,vxs,vys,vzs):
         try:
             ek = 0.5 * rho * (vx**2 + vy**2 + vz**2)
         except:
@@ -128,7 +128,7 @@ def plot_derived():
     Bxs = ia2.gen_vals('Bx',snapshots=snapshots,slcs=cents,los=los,c=c)
     Bys = ia2.gen_vals('By',snapshots=snapshots,slcs=cents,los=los,c=c)
     Bzs = ia2.gen_vals('Bz',snapshots=snapshots,slcs=cents,los=los,c=c)
-    for Bx,By,Bz in zip(Bxs,Bys,Bzs):
+    for s,Bx,By,Bz in zip(snapshots,Bxs,Bys,Bzs):
         try:
             B2 = Bx**2 + By**2 + Bz**2
         except:
