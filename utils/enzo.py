@@ -70,13 +70,32 @@ class IA2Data:
             raise ValueError(f'Variable {varName} is not recognised.')
 
         ret = read_hdf5(hdf5Name,varName,slc,los,c) * _const
+        return ret
+    
+    def gen_vals(self,varName,snapshots=None,redshifts=None,slcs=-1,los=0,c=1):
 
-        return ret  
+        if snapshots==None:
+            assert not redshifts==None, "Must provide list of snapshots or redshifts"
+            snapshots = [get_snapshot(z) for z in redshifts]
+        elif snapshots=='all':
+            snapshots = list(IA2.snapshots)
+        elif type(snapshots)==int:
+            snapshots = [snapshots]
+        else:
+            assert type(snapshots)==list, "Given snapshots must be an integer, list or 'all'."
+
+        if type(slcs)!=list:
+            slcs = [slcs,] * len(snapshots)
+        else:
+            assert type(slcs)==list, "Must ensure that a list of slices is passed."
+        
+        return (self.get_val(varName,snapshot=s,slc=slc,los=los,c=c) for s,slc in zip(snapshots,slcs))
 
     def get_centre(self,snapshot=None,redshift=None,c=1):
 
         dm = self.get_val('Dark_Matter_Density',snapshot,redshift,c=c)
         rho = self.get_val('Density',snapshot,redshift,c=c)
+
         dens = dm + rho
 
         centre_slice = np.where(dens==np.nanmax(dens))
