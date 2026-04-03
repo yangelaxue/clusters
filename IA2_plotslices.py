@@ -21,6 +21,20 @@ TODO Need to plot varticity and curlB
 
 def plot(val,varName,snapshot,vmin=None,vmax=None,norm=None,cbar_label=None):
 
+    # Define x and y values.
+    z = get_redshift(snapshot)
+    L = IA2.L * CGS.pc / (1+z)
+    if 'pc' in L_0:
+        L /= CGS.pc
+    if L_0.startswith('k'):
+        L /= 1e3
+    elif L_0.startswith('M'):
+        L /= 1e6
+    else:
+        raise NotImplementedError('Does not account for prefixes other than k and M.')
+    x, y = (np.linspace(0,L,IA2.dim//c),) * 2
+
+    # Start plotting.
     cmap = DefaultStyle.get_varkwargs(varName)['cbar_cmap']
 
     fig, ax = plt.subplots(**DefaultStyle.figkwargs)
@@ -31,8 +45,9 @@ def plot(val,varName,snapshot,vmin=None,vmax=None,norm=None,cbar_label=None):
         f'z={z}',(20,20),xycoords='axes pixels',ha='left',va='bottom',color='k',
         bbox={'facecolor':'white','alpha':0.6,'boxstyle':'square','pad':0.2,'lw':0}
         )
-    if warning:
-        ax.set_title(warning,c='r')
+    if slc==-1:
+        if snapshot not in centres.keys():
+            ax.set_title("not through cluster centre",c='r')
     im = ax.pcolormesh(x,y,val,vmin=vmin,vmax=vmax,norm=norm,cmap=cmap)
     cbar = get_cbar(im,fig,ax)
     cbar.ax.set_title(cbar_label,loc='left')
@@ -40,72 +55,96 @@ def plot(val,varName,snapshot,vmin=None,vmax=None,norm=None,cbar_label=None):
     plt.savefig(os.path.join(savePath,f'{varName}_{snapshot}_slice_los{los}.png'),dpi=DefaultStyle.figkwargs['dpi'])
     plt.close()
 
-def plot_raw(snapshot):
-    """ Animate all the raw fields. """
+def plot_raw():
 
     for field in IA2.fields:
 
-        norm = None
+        vals = ia2.gen_vals(field,snapshots=snapshots,slcs=cents,los=los,c=c)
+        
+        for s, val in zip(snapshots,vals):
 
-        try: # Check if we have the file downloaded.
-            val = ia2.get_val(field,snapshot=snapshot,redshift=z,slc=centre[los],los=los,c=c)
+            # See if the field values loaded.
+            try:
+                assert type(val)==np.ndarray
+            except:
+                print(f"... skipping plotting {field} for snapshot {s} ...")
+                continue
+
+            print(f"Plotting {field} for snapshot {s}.")
+            
+            z = get_redshift(s)
+
+            if 'Density' in field:
+                val /= CGS.mp
+                val *= (1+z)**3
+                cbar_label = r'$m_{\rm P}/{\rm cm}^3$'
+                norm = colors.LogNorm()
+            if field=='Temperature':
+                cbar_label = 'K'
+            if 'velocity' in field:
+                val /= 1e5
+                cbar_label=r'km/s'
+            if field in ('Bx','By','Bz'):
+                val /= 1e-6
+                val *= (1+z)**2
+                cbar_label = r'$\mu{\rm B}$'
+
+            vmin, vmax = None, None
+            if field in ('x-velocity','y-velocity','z-velocity','Bx','By','Bz'):
+                vmax = np.max(np.abs(val))
+                vmin = -vmax
+
+            plot(val,field,s,vmin,vmax,norm,cbar_label)
+
+def plot_derived():
+
+    # plot v^2 field
+    vxs = ia2.gen_val('x-velocity',snapshot=snapshots,slcs=cents,los=los,c=c)
+    vys = ia2.gen_val('y-velocity',snapshot=snapshots,slcs=cents,los=los,c=c)
+    vzs = ia2.gen_val('z-velocity',snapshot=snapshots,slcs=cents,los=los,c=c)
+    for vx,vy,vz in zip(vxs,vys,vzs):
+        try:
+            v2 = vx**2 + vy**2 + vz**2
         except:
-            print(f'... skipping plotting {field} for snapshot {snapshot} ...')
-            continue
+            print(f"... skipping plotting v2 for snapshot {s} ...")
+        print(f"Plotting v2 for snapshot {s}.")
+        plot(v2,'v2',s,0,None,None,'$v^2$ cgs units.')
 
-        print(f"Plotting {field} for snapshot {snapshot}.")
-        # Plot everything in predetermined units.
-        if 'Density' in field:
-            val /= CGS.mp
-            val *= (1+z)**3
-            cbar_label = r'$m_{\rm P}/{\rm cm}^3$'
-            norm = colors.LogNorm()
-        if field=='Temperature':
-            cbar_label = 'K'
-        if 'velocity' in field:
-            val /= 1e5
-            cbar_label=r'km/s'
-        if field in ('Bx','By','Bz'):
-            val /= 1e-6
-            val *= (1+z)**2
-            cbar_label = r'$\mu{\rm B}$'
+    # plot ek field
+    rhos = ia2.gen_val('Density',snapshot=snapshots,slcs=cents,los=los,c=c)
+    vxs = ia2.gen_val('x-velocity',snapshot=snapshots,slcs=cents,los=los,c=c)
+    vys = ia2.gen_val('y-velocity',snapshot=snapshots,slcs=cents,los=los,c=c)
+    vzs = ia2.gen_val('z-velocity',snapshot=snapshots,slcs=cents,los=los,c=c)
+    for rho,vx,vy,vz in zip(rhos,vxs,vys,vzs):
+        try:
+            ek = 0.5 * rho * (vx**2 + vy**2 + vz**2)
+        except:
+            print(f'... skipping plotting v2 for snapshot {s} ...')
+        print(f"Plotting ek for snapshot {s}.")
+        plot(ek,'ek',s,0,None,None,'$v^2$ cgs units.')
 
-        vmin, vmax = None, None
-        if field in ('x-velocity','y-velocity','z-velocity','Bx','By','Bz'):
-            vmax = np.max(np.abs(val))
-            vmin = -vmax
+    # Plot B2 field
+    Bxs = ia2.gen_val('Bx',snapshot=snapshots,slcs=cents,los=los,c=c)
+    Bys = ia2.gen_val('By',snapshot=snapshots,slcs=cents,los=los,c=c)
+    Bzs = ia2.gen_val('Bz',snapshot=snapshots,slcs=cents,los=los,c=c)
+    for Bx,By,Bz in zip(Bxs,Bys,Bzs):
+        try:
+            B2 = Bx**2 + By**2 + Bz**2
+        except:
+            print(f"... skipping plotting B2 for snapshot {s} ...")
+        print(f"Plotting B2 for snapshot {s}.")
+        plot(B2,'B2',s,0,None,None,'$v^2$ cgs units.')
 
-        plot(val,field,snapshot,vmin,vmax,norm,cbar_label)
+def save_centres(centres):
 
-def plot_derived(snapshot):
+    snaps, cs, cents = [], [], []
+    for s, centre in centres.items():
+        snaps.append([s])
+        cs.append([c])
+        cents.append(centre)
 
-    # Plot v^2 field
-    try: # Check if we have the file downloaded.
-        vx = ia2.get_val('x-velocity',snapshot=snapshot,redshift=z,slc=centre[los],los=los,c=c)
-        vy = ia2.get_val('y-velocity',snapshot=snapshot,redshift=z,slc=centre[los],los=los,c=c)
-        vz = ia2.get_val('z-velocity',snapshot=snapshot,redshift=z,slc=centre[los],los=los,c=c)
-        print(f"Plotting v2 for snapshot = {snapshot}")
-        plot(vx**2 + vy**2 + vz**2,'v2',snapshot,0,None,None,'$v^2$ cgs units.')
-    except:
-        print(f'... skipping plotting v2 for snapshot {snapshot} ...')
-    try:
-        rho = ia2.get_val('Density',snapshot=snapshot,redshift=z,slc=centre[los],los=los,c=c)
-        ek = 0.5 * rho * (vx**2 + vy**2 + vz**2)
-        print(f"Plotting ek for snapshot = {snapshot}")
-        plot(ek,'ek',snapshot,0,None,None,'KE cgs units.')
-    except:
-        print(f'... skipping plotting ek for snapshot {snapshot} ...')
-
-    # Plot B^2 field
-    try:
-        Bx = ia2.get_val('Bx',snapshot=snapshot,redshift=z,slc=centre[los],los=los,c=c)
-        By = ia2.get_val('By',snapshot=snapshot,redshift=z,slc=centre[los],los=los,c=c)
-        Bz = ia2.get_val('Bz',snapshot=snapshot,redshift=z,slc=centre[los],los=los,c=c)
-        print(f"Plotting B2 for snapshot = {snapshot}")
-        B2 = Bx**2 + By**2 + Bz**2
-        plot(B2,'B2',snapshot,0,None,None,'$B^2$ cgs units.')
-    except:
-        print(f'... skipping plotting B2 for snapshot {snapshot} ...')
+    arr  = np.concatenate([snaps,cs,cents],axis=1)
+    np.savetxt(centrefName,arr,header='snapshot c centre')
 
 if __name__=="__main__":
 
@@ -135,11 +174,11 @@ if __name__=="__main__":
     assert os.path.exists(args.Path), "First argument MUST be an existing path."
     Path = args.Path
     if not args.snapshots:
-        snapshots = IA2.snapshots
+        snapshots = list(IA2.snapshots)
     else:
         snapshots = args.snapshots.removeprefix('[').removesuffix(']')
         snapshots = [int(s) for s in snapshots.split(',')]    
-    slc = args.slc if args.slc else None
+    slc = args.slc if args.slc else -1
     los = args.los if args.los else '0'
     if los in {'0','x','X'}:
         los = 0
@@ -152,45 +191,46 @@ if __name__=="__main__":
     c = args.c if args.c else 1
     L_0 = args.L_0 if args.L_0 else 'kpc'
 
+    if 'E3A' in os.getcwd().split('/')[-1] or 'E3A' in Path.split('/')[-1]:
+        IA2.dim = 1024
+
     ia2 = IA2Data(Path)
 
     savePath = os.path.join(Path,'visualise')
     if not os.path.exists(savePath):
         os.mkdir(savePath)
 
-    with open(os.path.join(Path,"centre.txt"),"a") as f:
-        f.write("snapshot c centre\n")
+    # Calculate or load centres
+    cents = []
+    if slc==-1:
+        centres = {}
+        centrefName = os.path.join(Path,"centre.txt")
+        # Load saved centres
+        if os.path.exists(centrefName):
+            f = np.loadtxt(centrefName,skiprows=1)
+            for s in snapshots:
+                for line in f:
+                    if s in line:
+                        centres.update({s : line[2:]})
+                        continue
+        # Calculate and save centres
+        for s in snapshots:
+            if s not in centres:
+                try:
+                    centre = ia2.get_centre(snapshot=s,c=c)
+                    centres.update({s : centre})
+                    save_centres(centres)
+                except:
+                    pass
+        # Fill in remainder with grid centres
+        for s in snapshots:
+            if s in centres.keys():
+                cents.append(int(centres[s][los]))
+            else:
+                cents.append(IA2.dim//c//2)
+    else:
+        for s in snapshots:
+            cents.append(slc)
 
-    for s in snapshots:
-
-        z = get_redshift(s)
-        
-        # First convert L to physical CGS units.
-        L = IA2.L * CGS.pc / (1+z)
-        if 'pc' in L_0:
-            L /= CGS.pc
-        if L_0.startswith('k'):
-            L /= 1e3
-        elif L_0.startswith('M'):
-            L /= 1e6
-        else:
-            raise NotImplementedError('Does not account for prefixes other than k and M.')
-
-        if 'E3A' in os.getcwd().split('/')[-1] or 'E3A' in Path.split('/')[-1]:
-            IA2.dim = 1024
-
-        x, y = (np.linspace(0,L,IA2.dim//c),) * 2
-
-        # Calculate and save slice to plot.
-        warning = None
-        if slc==None:
-            try:
-                centre = ia2.get_centre(snapshot=s,c=c)
-                with open(os.path.join(Path,"centre.txt"),"a") as f:
-                    f.write(f"{s} {c} {centre}\n")
-            except:
-                centre = (IA2.dim//c//2,) * 3
-                warning = "not through cluster centre"
-
-        plot_raw(s)
-        plot_derived(s)
+    plot_raw()
+    plot_derived()

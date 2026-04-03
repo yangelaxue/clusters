@@ -19,6 +19,20 @@ from scipy.integrate import trapezoid
 
 def plot(val,varName,snapshot,vmin=None,vmax=None,norm=None,cbar_label=None):
 
+    # Define x and y values.
+    z = get_redshift(snapshot)
+    L = IA2.L * CGS.pc / (1+z)
+    if 'pc' in L_0:
+        L /= CGS.pc
+    if L_0.startswith('k'):
+        L /= 1e3
+    elif L_0.startswith('M'):
+        L /= 1e6
+    else:
+        raise NotImplementedError('Does not account for prefixes other than k and M.')
+    x, y = (np.linspace(0,L,IA2.dim),) * 2
+
+    # Start plotting.
     cmap = DefaultStyle.get_varkwargs(varName)['cbar_cmap']
 
     fig, ax = plt.subplots(**DefaultStyle.figkwargs)
@@ -36,46 +50,105 @@ def plot(val,varName,snapshot,vmin=None,vmax=None,norm=None,cbar_label=None):
     plt.savefig(os.path.join(savePath,f'{varName}_{snapshot}_projection_los{los}.png'),dpi=DefaultStyle.figkwargs['dpi'])
     plt.close()
 
-def plot_raw(snapshot):
-    """ Animate all the raw fields. """
+def plot_raw():
 
     for field in IA2.fields:
 
-        norm = None
+        vals = ia2.gen_vals(field,snapshots=snapshots)
 
-        try: # Check if we have the file downloaded.
-            val = ia2.get_val(field,snapshot=snapshot,redshift=z)
-        except:
-            print(f'... skipping plotting {field} for snapshot {snapshot} ...')
-            continue
+        for s, val in zip(snapshots,vals):
+            
+            # See if the field values loaded.
+            try:
+                assert type(val)==np.ndarray
+            except:
+                print(f"... skipping plotting {field} for snapshot {s} ...")
+                continue
+            
+            z = get_redshift(s)
 
-        print(f"Plotting {field} for snapshot {snapshot}.")
-        # Plot everything in predetermined units.
-        if 'Density' in field:
-            val /= CGS.mp
-            val *= (1+z)**3
-            cbar_label = r'$m_{\rm P}/{\rm cm}^3\times{\rm cm}$'
-            norm = colors.LogNorm()
-        elif field=='Temperature':
-            cbar_label = r'K$\times{\rm cm}$'
-        # elif 'velocity' in field:
-        #     val /= 1e5
-        #     cbar_label=r'km/s$\times{\rm cm}$'
-        # elif field in ('Bx','By','Bz'):
-        #     val /= 1e-6
-        #     val *= (1+z)**2
-        #     cbar_label = r'$\mu{\rm B}\times{\rm cm}$'
-        else:
-            continue
+            if 'Density' in field:
+                val /= CGS.mp
+                val *= (1+z)**3
+                cbar_label = r'$m_{\rm P}/{\rm cm}^3\times{\rm cm}$'
+                norm = colors.LogNorm()
+            elif field=='Temperature':
+                cbar_label = r'K$\times{\rm cm}$'
+            elif 'velocity' in field:
+                val /= 1e5
+                cbar_label=r'km/s$\times{\rm cm}$'
+            elif field in ('Bx','By','Bz'):
+                val /= 1e-6
+                val *= (1+z)**2
+                cbar_label = r'$\mu{\rm B}\times{\rm cm}$'
+            else:
+                print(f"... skipping plotting {field} for snapshot {s} ...")
+                continue
 
-        vmin, vmax = None, None
-        if field in ('x-velocity','y-velocity','z-velocity','Bx','By','Bz'):
-            vmax = np.max(np.abs(val))
-            vmin = -vmax
+            print(f"Plotting {field} for snapshot {s}.")
 
-        val = trapezoid(val,dx=L/IA2.dim*CGS.pc,axis=los)
+            z = get_redshift(s)
+            L = IA2.L * CGS.pc / (1+z)
+            if 'pc' in L_0:
+                L /= CGS.pc
+            if L_0.startswith('k'):
+                L /= 1e3
+            elif L_0.startswith('M'):
+                L /= 1e6
+            else:
+                raise NotImplementedError('Does not account for prefixes other than k and M.')
 
-        plot(val,field,snapshot,vmin,vmax,norm,cbar_label)
+            val = trapezoid(val,dx=L,axis=los)
+            
+            vmin, vmax = None, None
+            if field in ('x-velocity','y-velocity','z-velocity','Bx','By','Bz'):
+                vmax = np.max(np.abs(val))
+                vmin = -vmax
+
+            plot(val,field,s,vmin,vmax,norm,cbar_label)
+
+
+
+# def plot_raw(snapshot):
+#     """ Animate all the raw fields. """
+
+#     for field in IA2.fields:
+
+#         norm = None
+
+#         try: # Check if we have the file downloaded.
+#             val = ia2.get_val(field,snapshot=snapshot,redshift=z)
+#         except:
+#             print(f'... skipping plotting {field} for snapshot {snapshot} ...')
+#             continue
+
+#         print(f"Plotting {field} for snapshot {snapshot}.")
+#         # Plot everything in predetermined units.
+#         if 'Density' in field:
+#             val /= CGS.mp
+#             val *= (1+z)**3
+#             cbar_label = r'$m_{\rm P}/{\rm cm}^3\times{\rm cm}$'
+#             norm = colors.LogNorm()
+#         elif field=='Temperature':
+#             cbar_label = r'K$\times{\rm cm}$'
+#         # elif 'velocity' in field:
+#         #     val /= 1e5
+#         #     cbar_label=r'km/s$\times{\rm cm}$'
+#         # elif field in ('Bx','By','Bz'):
+#         #     val /= 1e-6
+#         #     val *= (1+z)**2
+#         #     cbar_label = r'$\mu{\rm B}\times{\rm cm}$'
+#         else:
+#             continue
+
+#         vmin, vmax = None, None
+#         if field in ('x-velocity','y-velocity','z-velocity','Bx','By','Bz'):
+#             vmax = np.max(np.abs(val))
+#             vmin = -vmax
+
+#         val = trapezoid(val,dx=L/IA2.dim*CGS.pc,axis=los)
+
+#         plot(val,field,snapshot,vmin,vmax,norm,cbar_label)
 
 def plot_derived(snapshot):
 
@@ -165,20 +238,7 @@ if __name__=="__main__":
 
     for s in snapshots:
 
-        z = get_redshift(s)
         
-        # First convert L to physical CGS units.
-        L = IA2.L * CGS.pc / (1+z)
-        if 'pc' in L_0:
-            L /= CGS.pc
-        if L_0.startswith('k'):
-            L /= 1e3
-        elif L_0.startswith('M'):
-            L /= 1e6
-        else:
-            raise NotImplementedError('Does not account for prefixes other than k and M.')
-
-        x, y = (np.linspace(0,L,IA2.dim),) * 2
 
         plot_raw(s)
         plot_derived(s)
