@@ -156,7 +156,7 @@ if __name__=="__main__":
     assert os.path.exists(args.Path), "First argument MUST be an existing path."
     Path = args.Path
     if not args.snapshots:
-        snapshots = IA2.snapshots
+        snapshots = list(IA2.snapshots)
     else:
         snapshots = args.snapshots.removeprefix('[').removesuffix(']')
         snapshots = [int(s) for s in snapshots.split(',')]    
