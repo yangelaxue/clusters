@@ -105,7 +105,7 @@ def plot_derived():
         print(f"Plotting v2 for snapshot = {s}")
         z = get_redshift(s)
         val = trapezoid(v2,dx=IA2.dL*CGS.pc/(1+z),axis=los)
-        plot(val,'v2',s,0,None,None,'$v^2\times{\rm cm}$ cgs units.')
+        plot(val,'v2',s,0,None,None,r'$v^2\times{\rm cm}$ cgs units.')
 
         try:
             ek = 0.5 * rho * v2
@@ -128,7 +128,7 @@ def plot_derived():
             continue
         print(f"Plotting B2 for snapshot = {s}")
         val = trapezoid(B2,dx=IA2.dL*CGS.pc/(1+z),axis=los)
-        plot(val,'B2',s,0,None,None,'$B^2$ cgs units.')
+        plot(val,'B2',s,0,None,None,r'$B^2\times{\rm cm}$ cgs units.')
 
 if __name__=="__main__":
 
