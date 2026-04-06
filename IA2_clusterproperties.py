@@ -59,7 +59,7 @@ if __name__=="__main__":
     parser = argparse.ArgumentParser("main")
     parser.add_argument("Path", help="Path to PLUTO data.", type=str)
     parser.add_argument("Delta", help="Delta times the critical density of the universe.", type=str)
-    parser.add_argument("-snapshots", help="Which snapshot to calculate parameters of. Defaults to 15th.",required=False)
+    parser.add_argument("-snapshot", help="Which snapshot to calculate parameters of. Defaults to 15th.",required=False)
 
     args = parser.parse_args()
 
