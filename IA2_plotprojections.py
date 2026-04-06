@@ -47,10 +47,11 @@ def plot_raw():
 
         vals = ia2.gen_vals(field,snapshots=snapshots)
 
-        for s, val in zip(snapshots,vals):
-            
+        for s in snapshots:
+
             # See if the field values loaded.
             try:
+                val = next(vals)
                 assert type(val)==np.ndarray
             except:
                 print(f"... skipping plotting {field} for snapshot {s} ...")
@@ -92,27 +93,34 @@ def plot_raw():
 def plot_derived():
 
     # Plot v^2 field
-    rhos = ia2.gen_vals('Density',snapshots=snapshots)
     vxs = ia2.gen_vals('x-velocity',snapshots=snapshots)
     vys = ia2.gen_vals('y-velocity',snapshots=snapshots)
     vzs = ia2.gen_vals('z-velocity',snapshots=snapshots)
-    for s,rho,vx,vy,vz in zip(snapshots,rhos,vxs,vys,vzs):
+    for s in snapshots:
         try: # Check if we have the file downloaded.
-            v2 = vx**2 + vy**2 + vz**2
+            vx, vy, vz = next(vxs), next(vys), next(vzs)
         except:
             print(f'... skipping plotting v2 for snapshot {s} ...')
             continue
         print(f"Plotting v2 for snapshot = {s}")
         z = get_redshift(s)
+        v2 = vx**2 + vy**2 + vz**2
         val = trapezoid(v2,dx=IA2.dL*CGS.pc/(1+z),axis=los)
         plot(val,'v2',s,0,None,None,r'$v^2\times{\rm cm}$ cgs units.')
 
+    # Plot ek field
+    rhos = ia2.gen_vals('Density',snapshots=snapshots)
+    vxs = ia2.gen_vals('x-velocity',snapshots=snapshots)
+    vys = ia2.gen_vals('y-velocity',snapshots=snapshots)
+    vzs = ia2.gen_vals('z-velocity',snapshots=snapshots)
+    for s in snapshots:
         try:
-            ek = 0.5 * rho * v2
+            rho, vx, vy, vz = next(rhos), next(vxs), next(vys), next(vzs)
         except:
             print(f'... skipping plotting ek for snapshot {s} ...')
             continue
         print(f"Plotting ek for snapshot = {s}")
+        ek = 0.5 * rho * v2
         val = trapezoid(ek,dx=IA2.dL*CGS.pc/(1+z),axis=los)
         plot(val,'ek',s,0,None,None,'KE cgs units.')
 
@@ -120,13 +128,14 @@ def plot_derived():
     Bxs = ia2.gen_vals('Bx',snapshots=snapshots)
     Bys = ia2.gen_vals('By',snapshots=snapshots)
     Bzs = ia2.gen_vals('Bz',snapshots=snapshots)
-    for s,Bx,By,Bz in zip(snapshots,Bxs,Bys,Bzs):
+    for s in snapshots:
         try:
-            B2 = Bx**2 + By**2 + Bz**2
+            Bx, By, Bz = next(Bxs), next(Bys), next(Bzs)
         except:
             print(f'... skipping plotting B2 for snapshot {s} ...')
             continue
         print(f"Plotting B2 for snapshot = {s}")
+        B2 = Bx**2 + By**2 + Bz**2
         val = trapezoid(B2,dx=IA2.dL*CGS.pc/(1+z),axis=los)
         plot(val,'B2',s,0,None,None,r'$B^2\times{\rm cm}$ cgs units.')
 

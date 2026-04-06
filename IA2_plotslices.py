@@ -61,11 +61,11 @@ def plot_raw():
 
         vals = ia2.gen_vals(field,snapshots=snapshots,slcs=cents,los=los,c=c)
         
-        for s, val in zip(snapshots,vals):
+        for s in snapshots:
 
             # See if the field values loaded.
             try:
-                assert type(val)==np.ndarray
+                val = next(vals)
             except:
                 print(f"... skipping plotting {field} for snapshot {s} ...")
                 continue
@@ -103,37 +103,40 @@ def plot_derived():
     vxs = ia2.gen_vals('x-velocity',snapshots=snapshots,slcs=cents,los=los,c=c)
     vys = ia2.gen_vals('y-velocity',snapshots=snapshots,slcs=cents,los=los,c=c)
     vzs = ia2.gen_vals('z-velocity',snapshots=snapshots,slcs=cents,los=los,c=c)
-    for s,vx,vy,vz in zip(snapshots,vxs,vys,vzs):
+    for s, in snapshots:
         try:
-            v2 = vx**2 + vy**2 + vz**2
+            vx, vy, vz = next(vxs), next(vys), next(vzs)
         except:
             print(f"... skipping plotting v2 for snapshot {s} ...")
         print(f"Plotting v2 for snapshot {s}.")
-        plot(v2,'v2',s,0,None,None,'$v^2$ cgs units.')
+        v2 = vx**2 + vy**2 + vz**2
+        plot(v2,'v2',s,0,None,None,'$v^2$ cgs units.')        
 
     # plot ek field
     rhos = ia2.gen_vals('Density',snapshots=snapshots,slcs=cents,los=los,c=c)
     vxs = ia2.gen_vals('x-velocity',snapshots=snapshots,slcs=cents,los=los,c=c)
     vys = ia2.gen_vals('y-velocity',snapshots=snapshots,slcs=cents,los=los,c=c)
     vzs = ia2.gen_vals('z-velocity',snapshots=snapshots,slcs=cents,los=los,c=c)
-    for s,rho,vx,vy,vz in zip(snapshots,rhos,vxs,vys,vzs):
+    for s in snapshots:
         try:
-            ek = 0.5 * rho * (vx**2 + vy**2 + vz**2)
+            rho, vx, vy, vz = next(rhos), next(vxs), next(vys), next(vzs)
         except:
             print(f'... skipping plotting v2 for snapshot {s} ...')
         print(f"Plotting ek for snapshot {s}.")
+        ek = 0.5 * rho * (vx**2 + vy**2 + vz**2)
         plot(ek,'ek',s,0,None,None,'$v^2$ cgs units.')
 
     # Plot B2 field
     Bxs = ia2.gen_vals('Bx',snapshots=snapshots,slcs=cents,los=los,c=c)
     Bys = ia2.gen_vals('By',snapshots=snapshots,slcs=cents,los=los,c=c)
     Bzs = ia2.gen_vals('Bz',snapshots=snapshots,slcs=cents,los=los,c=c)
-    for s,Bx,By,Bz in zip(snapshots,Bxs,Bys,Bzs):
+    for s in snapshots:
         try:
-            B2 = Bx**2 + By**2 + Bz**2
+            Bx, By, Bz = next(Bxs), next(Bys), next(Bzs)
         except:
             print(f"... skipping plotting B2 for snapshot {s} ...")
         print(f"Plotting B2 for snapshot {s}.")
+        B2 = Bx**2 + By**2 + Bz**2
         plot(B2,'B2',s,0,None,None,'$v^2$ cgs units.')
 
 def save_centres(centres):
