@@ -39,7 +39,7 @@ class IA2Data:
     def __init__(self,Path):
         self.Path = Path
 
-    def get_val(self,varName,snapshot=None,redshift=None,slc=-1,los=0,c=1):
+    def get_val(self,varName,snapshot=None,redshift=None,slc=-1,los=0,c=1,units='cgs'):
         """
         Load field data of a single field from a single snapshot.
         Return it in physical CGS units.
@@ -58,21 +58,30 @@ class IA2Data:
         
         if varName in {'Density','Dark_Matter_Density','Temperature'}:
             hdf5Name = hdf5Name.format('dt')
-            if 'Density' in varName:
-                _const *= IA2.cd*(1+z)**3
         elif varName in {'x-velocity','y-velocity','z-velocity'}:
             hdf5Name = hdf5Name.format('v')
-            _const *= IA2.cv
         elif varName in {'Bx','By','Bz'}:
             hdf5Name = hdf5Name.format('b')
-            _const *= IA2.cb*(1+z)**2
         else:
             raise ValueError(f'Variable {varName} is not recognised.')
+        
+        if units.lower()=='cgs':
+            if 'Density' in varName:
+                _const *= IA2.cd*(1+z)**3
+            elif varName in {'x-velocity','y-velocity','z-velocity'}:
+                _const *= IA2.cv
+            elif varName in {'Bx','By','Bz'}:
+                _const *= IA2.cb*(1+z)**2
+        elif units.lower()=='code':
+            _const = 1
+        else:
+            raise ValueError(f"Units {units} is not supported.")
 
         ret = read_hdf5(hdf5Name,varName,slc,los,c) * _const
         return ret
     
-    def gen_vals(self,varName,snapshots=None,redshifts=None,slcs=-1,los=0,c=1):
+    def gen_vals(self,varName,snapshots=None,redshifts=None,**kwargs):
+        """ See get_val """
 
         if snapshots==None:
             assert not redshifts==None, "Must provide list of snapshots or redshifts"
@@ -89,7 +98,7 @@ class IA2Data:
         else:
             assert type(slcs)==list, "Must ensure that a list of slices is passed."
         
-        return (self.get_val(varName,snapshot=s,slc=slc,los=los,c=c) for s,slc in zip(snapshots,slcs))
+        return (self.get_val(varName,snapshot=s,**kwargs) for s,slc in zip(snapshots,slcs))
 
     def get_centre(self,snapshot=None,redshift=None,c=1):
 
