@@ -35,7 +35,7 @@ if __name__=="__main__":
     # Validate inputs.
     assert os.path.exists(args.Path), "First argument MUST be an existing path."
     Path = args.Path
-    Delta = float(args.Delta)
+    Delta_list = [float(_Delta) for _Delta in args.Delta.split(',')]
     snapshot = int(args.snapshot) if args.snapshot else 15
     c = int(args.c) if args.c else 1
 
@@ -73,16 +73,17 @@ if __name__=="__main__":
             return RegularGridInterpolator(r_arr[np.newaxis],M_arr)([r])[0]
     rhoavg_r = lambda r : M_r(r) / V_r(r)
 
-    r_Delta = root_scalar(lambda r : rhoavg_r(r)/rho_cr-Delta,x0=.1*(CGS.pc*1e6)).root
-    M_Delta = M_r(r_Delta)
-    rho_Delta = rhoavg_r(r_Delta)
-    c_s = np.mean((IA2.gamma*CGS.kB*temp[R<r_Delta]/CGS.mp)**.5)
-    t_s = 2*r_Delta/c_s
+    for Delta in Delta_list:
+        r_Delta = root_scalar(lambda r : rhoavg_r(r)/rho_cr-Delta,x0=.1*(CGS.pc*1e6)).root
+        M_Delta = M_r(r_Delta)
+        rho_Delta = rhoavg_r(r_Delta)
+        c_s = np.mean((IA2.gamma*CGS.kB*temp[R<r_Delta]/CGS.mp)**.5)
+        t_s = 2*r_Delta/c_s
 
-    with open(os.path.join(Path,f'cluster_{int(Delta)}.txt'),'w') as f:
-        f.write(f"r_{int(Delta)} M_{int(Delta)} rho_{int(Delta)} c_s t_s\n")
-        f.write(f"{r_Delta}, {M_Delta}, {rho_Delta}, {c_s}, {t_s}\n")
-        f.write(f"{r_Delta/(CGS.pc*1e6)} Mpc, 10^{np.log10(M_Delta/CGS.Msun)} Msun, {rho_Delta/CGS.mp} m_p/cm^3, {c_s/1e5} km/s, {t_s/(CGS.yr*1e9)} Gyr\n")
+        with open(os.path.join(Path,f'cluster_{int(Delta)}.txt'),'w') as f:
+            f.write(f"r_{int(Delta)} M_{int(Delta)} rho_{int(Delta)} c_s t_s\n")
+            f.write(f"{r_Delta}, {M_Delta}, {rho_Delta}, {c_s}, {t_s}\n")
+            f.write(f"{r_Delta/(CGS.pc*1e6)} Mpc, 10^{np.log10(M_Delta/CGS.Msun)} Msun, {rho_Delta/CGS.mp} m_p/cm^3, {c_s/1e5} km/s, {t_s/(CGS.yr*1e9)} Gyr\n")
 
     # np.savetxt(os.path.join(Path,f'cluster_{Delta}.txt'),[r_Delta,M_Delta,rho_Delta,c_s,t_s],header=f"r_{Delta} M_{Delta} rho_{Delta} c_s t_s")
 
