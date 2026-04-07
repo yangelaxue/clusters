@@ -41,7 +41,7 @@ if __name__=="__main__":
     c = int(args.c) if args.c else 1
 
     # Prelim
-    if Path.endswith('E3A-PM'):
+    if 'E3A' in Path or 'E3A' in os.getcwd().split('/')[-1]:
         IA2.dim = 1024
 
     # Redshift constants
