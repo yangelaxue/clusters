@@ -50,8 +50,7 @@ if __name__=="__main__":
 
     # Load data
     ia2 = IA2Data(Path)
-    rho = np.array(ia2.get_val("Density",snapshot,c=c,units='cgs'),dtype=np.float64)
-    dens = rho + np.array(ia2.get_val("Dark_Matter_Density",snapshot,c=c,units='cgs'),dtype=np.float64)
+    dens = np.array(ia2.get_val("Density",snapshot,c=c,units='cgs')+ia2.get_val("Dark_Matter_Density",snapshot,c=c,units='cgs'),dtype=np.float64)
     temp = np.array(ia2.get_val("Temperature",snapshot,c=c,units='cgs'),dtype=np.float64)
 
     # Calculate derived values
