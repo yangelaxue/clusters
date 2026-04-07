@@ -1,5 +1,6 @@
 """
 Script that calculates important cluster properties such as critical mass and radius.
+Saves information to text as CGS units and human readable units.
 
 Author: Angela Xue
 Date: April 2026
