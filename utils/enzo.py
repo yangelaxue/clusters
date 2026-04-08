@@ -8,8 +8,8 @@ Date: March 2026
 
 import numpy as np
 import h5py, os
-from units import CGS
-from clusters import calc_centreofmass
+from utils.units import CGS
+from utils.clusters import calc_centreofmass
 
 class IA2:
 

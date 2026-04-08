@@ -35,7 +35,7 @@ Date: March 2026
 import numpy as np
 import os, h5py
 
-from units import CGS
+from utils.units import CGS
 
 class PlutoData:
 
