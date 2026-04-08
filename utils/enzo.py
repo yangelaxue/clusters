@@ -8,6 +8,8 @@ Date: March 2026
 
 import numpy as np
 import h5py, os
+from units import CGS
+from clusters import calc_centreofmass
 
 class IA2:
 
@@ -38,6 +40,11 @@ class IA2Data:
 
     def __init__(self,Path):
         self.Path = Path
+
+        if 'E3A' in self.Path or 'E3A' in os.getcwd().split('/')[-1]:
+            self.dim = 1024
+        else:
+            self.dim = IA2.dim
 
     def get_val(self,varName,snapshot=None,redshift=None,slc=-1,los=0,c=1,units='cgs'):
         """
@@ -100,17 +107,77 @@ class IA2Data:
         
         return (self.get_val(varName,snapshot=s,**kwargs) for s,slc in zip(snapshots,slcs))
 
-    def get_centre(self,snapshot=None,redshift=None,c=1):
+    def get_centre(self,snapshot=None,redshift=None,_c=1):
 
-        dm = self.get_val('Dark_Matter_Density',snapshot,redshift,c=c)
-        rho = self.get_val('Density',snapshot,redshift,c=c)
+        if snapshot==None:
+            snapshot = get_snapshot(redshift)
+        centres_fName = os.path.join(self.Path,'centre.txt')
+        
+        if _c!=1:
+            centres_fName = os.path.join(self.Path,'centre_test.txt')
+            print(f"In debug mode. Loading to and saving from {centres_fName}.")    
+        
+        if os.path.exists(centres_fName):
+            centres = np.loadtxt(centres_fName,skiprows=1)
+            if centres.ndim==1:
+                centres = centres.reshape(1,-1)
 
-        dens = dm + rho
+            idx = np.where(centres[:,0]==snapshot)[0]
+            if len(idx)==1:
+                idx, = idx
+                centre = tuple(int(cen) for cen in centres[idx][1:])
+                return centre
+                
+        dm = self.get_val('Dark_Matter_Density',snapshot,redshift,c=_c)
+        rho = self.get_val('Density',snapshot,redshift,c=_c)
+        # dens = dm + rho
 
-        centre_slice = np.where(dens==np.nanmax(dens))
-        centre = centre_slice[0][0], centre_slice[1][0], centre_slice[2][0]
+        centre = calc_centreofmass(rho+dm)
 
-        return centre
+        # centre_slice = np.where(dens==np.nanmax(dens))
+        # centre = int(centre_slice[0][0]), int(centre_slice[1][0]), int(centre_slice[2][0])
+
+        save = np.array([snapshot,*centre])[np.newaxis]
+        try:
+            centres = np.concatenate([centres,save])
+        except:
+            centres = save
+        np.savetxt(centres_fName,centres,header='snapshot centre')
+
+        return tuple(int(cen) for cen in centre)
+    
+    def get_x(self,snapshot=None,redshift=None,c=1,units='kpc',_shift=0):
+        """
+        TODO
+        """
+
+        _const = IA2.dL
+
+        if not redshift:
+            try:
+                redshift = get_redshift(snapshot)
+                z = redshift
+                _const *= 1/(1+z)
+            except:
+                _const *= 1
+        
+        if units.endswith('pc'):
+            if units.startswith('k'):
+                _const /= 1
+            elif units.startswith('M'):
+                _const /= 1e3
+            elif units=='pc':
+                _const *= 1e3
+            else:
+                raise KeyError(f"Do not recognise units {units}.")
+        elif units.lower()=='cgs':
+            _const *= CGS.pc*1e3
+        else:
+            raise KeyError(f"Do not recognise units {units}.")
+
+        x = (np.arange(0,self.dim//c)-_shift) * _const
+
+        return x
     
     def save_derivedfield(self,snapshot=None,redshift=None,c=1):
         """
@@ -120,7 +187,7 @@ class IA2Data:
         """
 
         vx = (self.get_val(field,snapshot,redshift,c=c) for field in ('x-velocity','y-velocity','z-velocity'))
-        v2 = np.zeros((IA2.dim//c,)*3)
+        v2 = np.zeros((IA2.self//c,)*3)
         for _vx in vx:
             v2 += _vx**2
 
