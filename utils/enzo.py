@@ -128,14 +128,8 @@ class IA2Data:
                 centre = tuple(int(cen) for cen in centres[idx][1:])
                 return centre
                 
-        dm = self.get_val('Dark_Matter_Density',snapshot,redshift,c=_c)
-        rho = self.get_val('Density',snapshot,redshift,c=_c)
-        # dens = dm + rho
-
-        centre = calc_centreofmass(rho+dm)
-
-        # centre_slice = np.where(dens==np.nanmax(dens))
-        # centre = int(centre_slice[0][0]), int(centre_slice[1][0]), int(centre_slice[2][0])
+        dens = self.get_val('Dark_Matter_Density',snapshot,redshift,c=_c) + self.get_val('Density',snapshot,redshift,c=_c)
+        centre = calc_centreofmass(dens)
 
         save = np.array([snapshot,*centre])[np.newaxis]
         try:
