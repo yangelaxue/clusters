@@ -19,7 +19,7 @@ if __name__=="__main__":
 
         for s in IA2.snapshots:
             try:
-                ia2.get_centre(s,_c=5)
+                ia2.get_centre(s)
             except:
                 continue
 
