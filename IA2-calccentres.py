@@ -28,7 +28,7 @@ if __name__=="__main__":
             except:
                 continue
             
-            rho_c.append([s])
+            rho_cs.append([s])
             rho_c = ia2.get_val('Density',s,c=c,slc=int(centre[0]))[int(centre[1]),int(centre[2])]
             rho_cs[-1].append(rho_c)
         
