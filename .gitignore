@@ -4,6 +4,7 @@ _*
 # Jupyter Notebooks
 .ipynb_checkpoints
 *.ipynb
+!IA2-toPLUTO.ipynb
 
 # virtual environment
 venv
