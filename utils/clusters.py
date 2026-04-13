@@ -13,12 +13,12 @@ def calc_centreofmass(dens,XYZ=None,):
         xyz = tuple(np.arange(0,sh) for sh in dens.shape)
         XYZ = np.meshgrid(*xyz,indexing='ij')
     
-    centre = np.sum([dens*X for X in XYZ],axis=(1,2,3))/np.sum(dens)
+    centre = np.sum(dens*np.array(XYZ),axis=(1,2,3))/np.sum(dens)
     
     return centre
 
 def calc_avgvelocity(dens,vxvyvz):
 
-    vel = np.sum([dens*vx for vx in vxvyvz],axis=(1,2,3))/np.sum(dens)
+    vel = np.sum(dens*np.array(vxvyvz),axis=(1,2,3))/np.sum(dens)
 
     return vel
