@@ -169,7 +169,7 @@ class IA2Data:
         else:
             raise KeyError(f"Do not recognise units {units}.")
 
-        x = (np.arange(0,self.dim//c)-_shift) * _const
+        x = (np.arange(0,self.dim,c)-_shift) * _const
 
         return x
     
