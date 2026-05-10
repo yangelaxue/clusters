@@ -178,7 +178,7 @@ class DefaultStyle:
                     'title' : r'$y$-Magnetic Field',
                     'cbar_label' : r'$B_y$',
                 })
-            else:
+            elif varName in {'Bx3','Bz'}:
                 kwargs.update({
                     'title' : r'$z$-Magnetic Field',
                     'cbar_label' : r'$B_z$',
