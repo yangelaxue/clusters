@@ -13,6 +13,14 @@ from utils.clusters import calc_centreofmass
 
 class IA2:
 
+    Omega_r0 = 0 
+    Omega_bm0 = 0.0441
+    Omega_dm0 = 0.2139
+    Omega_Lambda0 = 0.742
+    Omega_k0 = 0.
+    h_0 = 0.72
+    H_0 = 100*h_0*1e5/(CGS.pc*1e6) # In CGS units.
+
     cd = 2.66e-30
     cv = 6.47e9
     cb = (cd*4*np.pi)**.5 * cv
