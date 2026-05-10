@@ -9,7 +9,7 @@ Date: March 2026
 #%% Imports.
 
 from numpy import pi
-from gradient import invlapl_FT, gradient_FT
+from gradient import invlapl_FT, gradient_FT, gradient_discrete
 
 def get_gravpot(rho, dxdydz=None, G=1.):
     """
@@ -36,7 +36,7 @@ def get_gravpot(rho, dxdydz=None, G=1.):
     
     return potential
 
-def get_gravforce_from_pot(potential,dxdydz):
+def get_gravforce_from_pot(potential,dxdydz,stencil=None):
     """
     Calculate the gravitational vector field given gravitational potential in
     cartesian coordinates by taking the gradient of said potential field.
@@ -53,6 +53,9 @@ def get_gravforce_from_pot(potential,dxdydz):
     grav_force : list
         List of gravitational accceleration in the x, y and z directions respectively.
     """
-    
-    return [-gradient for gradient in gradient_FT(potential,dxdydz)]
+
+    if stencil:
+        return [-gradient for gradient in gradient_discrete(potential,dxdydz,stencil)]
+    else:
+        return [-gradient for gradient in gradient_FT(potential,dxdydz)]
     
