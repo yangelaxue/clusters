@@ -23,7 +23,7 @@ def plot_raw():
 
     for var in pd.varNames:
 
-        vals = pd.get_vals(var,snapshots,slc=slc,los=los,c=c)
+        vals = pd.get_vals(var,snapshots,slc=slc,los=los,c=c,units=units)
 
         vmin, vmax = None, None
         if 'vx' in var or 'Bx' in var:
@@ -32,10 +32,10 @@ def plot_raw():
 
         fig, ax = plt.subplots(figsize=DefaultStyle.figkwargs['figsize'])
         ax.set_aspect('equal')
-        ax.set_xlabel('$x$ kpc')
-        ax.set_ylabel('$y$ kpc')
+        ax.set_xlabel('$x$' + ' ' + L_0)
+        ax.set_ylabel('$y$' + ' ' + L_0)
 
-        animate_meshgrid(vals,fig,ax,var,labels,savePath=os.path.join(savePath,var+'_slice.gif'),x=x,y=y,vmin=vmin,vmax=vmax)
+        animate_meshgrid(vals,fig,ax,var,labels,savePath=os.path.join(savePath,var+'_slice.gif'),x=x,y=y,vmin=vmin,vmax=vmax,units=units)
     
 def plot_derived():
     """
@@ -43,63 +43,63 @@ def plot_derived():
         v^2, vorticity, B^2, curl(B).
     """
     # Animate derived v2 field
-    vx1s = pd.gen_vals('vx1',snapshots,slc=slc,los=los,c=c)
-    vx2s = pd.gen_vals('vx2',snapshots,slc=slc,los=los,c=c)
+    vx1s = pd.gen_vals('vx1',snapshots,slc=slc,los=los,c=c,units=units)
+    vx2s = pd.gen_vals('vx2',snapshots,slc=slc,los=los,c=c,units=units)
     if pd.ndim==2:
         vals = [vx1**2 + vx2**2 for vx1,vx2 in zip(vx1s,vx2s)]
     elif pd.ndim==3:
-        vx3s = pd.gen_vals('vx3',snapshots,slc=slc,los=los,c=c)
+        vx3s = pd.gen_vals('vx3',snapshots,slc=slc,los=los,c=c,units=units)
         vals = [vx1**2 + vx2**2+vx3**2 for vx1,vx2,vx3 in zip(vx1s,vx2s,vx3s)]
     fig, ax = plt.subplots(figsize=DefaultStyle.figkwargs['figsize'])
     ax.set_aspect('equal')
-    ax.set_xlabel('$x$ kpc')
-    ax.set_ylabel('$y$ kpc')
-    animate_meshgrid(vals,fig,ax,'v2',labels,savePath=os.path.join(savePath,'v2'+'_slice.gif'),x=x,y=y,vmin=0,vmax=np.max(vals))
+    ax.set_xlabel('$x$' + ' ' + L_0)
+    ax.set_ylabel('$y$' + ' ' + L_0)
+    animate_meshgrid(vals,fig,ax,'v2',labels,savePath=os.path.join(savePath,'v2'+'_slice.gif'),x=x,y=y,vmin=0,vmax=np.max(vals),units=units)
 
     # Animate derived vor v field
     dxdydz = pd.get_dxdydz(L_0)
     dxdydz = tuple(dx*c for dx in dxdydz)
-    vx1s = pd.gen_vals('vx1',snapshots,c=c)
-    vx2s = pd.gen_vals('vx2',snapshots,c=c)
+    vx1s = pd.gen_vals('vx1',snapshots,c=c,units=units)
+    vx2s = pd.gen_vals('vx2',snapshots,c=c,units=units)
     if pd.ndim==2:
         vor = (curl_discrete(vx1,vx2,dxdydz=dxdydz) for vx1,vx2 in zip(vx1s,vx2s))
         vormag = ((vorx**2 + vory**2)**.5 for vorx,vory in vor)
     elif pd.ndim==3:
-        vx3s = pd.gen_vals('vx3',snapshots,c=c)
+        vx3s = pd.gen_vals('vx3',snapshots,c=c,units=units)
         vor = [curl_discrete(vx1,vx2,vx3,dxdydz=dxdydz) for vx1,vx2,vx3 in zip(vx1s, vx2s, vx3s)]
         vormag = ((vorx**2 + vory**2 + vorz**2)**.5 for vorx,vory,vorz in vor)
     vals = [get_slice(val,slc,los) for val in vormag]
     fig, ax = plt.subplots(figsize=DefaultStyle.figkwargs['figsize'])
     ax.set_aspect('equal')
-    ax.set_xlabel('$x$ kpc')
-    ax.set_ylabel('$y$ kpc')
-    animate_meshgrid(vals,fig,ax,'vor',labels,savePath=os.path.join(savePath,'vor'+'_slice.gif'),x=x,y=y,vmin=0,vmax=np.max(vals))
+    ax.set_xlabel('$x$' + ' ' + L_0)
+    ax.set_ylabel('$y$' + ' ' + L_0)
+    animate_meshgrid(vals,fig,ax,'vor',labels,savePath=os.path.join(savePath,'vor'+'_slice.gif'),x=x,y=y,vmin=0,vmax=np.max(vals),units=units)
 
     if pd.PHYSICS=='MHD':
         # Animate derived B2 field
-        Bx1s = pd.gen_vals('Bx1',snapshots,slc=slc,los=los,c=c)
-        Bx2s = pd.gen_vals('Bx2',snapshots,slc=slc,los=los,c=c)
+        Bx1s = pd.gen_vals('Bx1',snapshots,slc=slc,los=los,c=c,units=units)
+        Bx2s = pd.gen_vals('Bx2',snapshots,slc=slc,los=los,c=c,units=units)
         if pd.ndim==2:
             vals = [Bx1**2 + Bx2**2 for Bx1,Bx2 in zip(Bx1s,Bx2s)]
         elif pd.ndim==3:
-            Bx3s = pd.gen_vals('Bx3',snapshots,slc=slc,los=los,c=c)
+            Bx3s = pd.gen_vals('Bx3',snapshots,slc=slc,los=los,c=c,units=units)
             vals = [Bx1**2 + Bx2**2 + Bx3**2 for Bx1,Bx2,Bx3 in zip(Bx1s,Bx2s,Bx3s)]
         fig, ax = plt.subplots(figsize=DefaultStyle.figkwargs['figsize'])
         ax.set_aspect('equal')
-        ax.set_xlabel('$x$ kpc')
-        ax.set_ylabel('$y$ kpc')
-        animate_meshgrid(vals,fig,ax,'B2',labels,savePath=os.path.join(savePath,'B2'+'_slice.gif'),x=x,y=y,vmin=0,vmax=np.max(vals))
+        ax.set_xlabel('$x$' + ' ' + L_0)
+        ax.set_ylabel('$y$' + ' ' + L_0)
+        animate_meshgrid(vals,fig,ax,'B2',labels,savePath=os.path.join(savePath,'B2'+'_slice.gif'),x=x,y=y,vmin=0,vmax=np.max(vals),units=units)
 
         # Animate derived curlB field
         dxdydz = pd.get_dxdydz(L_0)
         dxdydz = tuple(dx*c for dx in dxdydz)
-        Bx1s = pd.gen_vals('Bx1',snapshots,c=c)
-        Bx2s = pd.gen_vals('Bx2',snapshots,c=c)
+        Bx1s = pd.gen_vals('Bx1',snapshots,c=c,units=units)
+        Bx2s = pd.gen_vals('Bx2',snapshots,c=c,units=units)
         if pd.ndim==2:
             vor = (curl_discrete(Bx1,Bx2,dxdydz=dxdydz) for Bx1,Bx2 in zip(Bx1s,Bx2s))
             vormag = ((vorx**2 + vory**2)**.5 for vorx,vory in vor)
         elif pd.ndim==3:
-            Bx3s = pd.gen_vals('Bx3',snapshots,c=c)
+            Bx3s = pd.gen_vals('Bx3',snapshots,c=c,units=units)
             vor = [curl_discrete(Bx1,Bx2,Bx3,dxdydz=dxdydz) for Bx1,Bx2,Bx3 in zip(Bx1s, Bx2s, Bx3s)]
             vormag = ((vorx**2 + vory**2 + vorz**2)**.5 for vorx,vory,vorz in vor)
         vals = [get_slice(val,slc,los) for val in vormag]
@@ -107,7 +107,7 @@ def plot_derived():
         ax.set_aspect('equal')
         ax.set_xlabel('$x$ kpc')
         ax.set_ylabel('$y$ kpc')
-        animate_meshgrid(vals,fig,ax,'curlB',labels,savePath=os.path.join(savePath,'curlB'+'_slice.gif'),x=x,y=y,vmin=0,vmax=np.max(vals))
+        animate_meshgrid(vals,fig,ax,'curlB',labels,savePath=os.path.join(savePath,'curlB'+'_slice.gif'),x=x,y=y,vmin=0,vmax=np.max(vals),units=units)
 
 if __name__=="__main__":
 
@@ -125,10 +125,11 @@ if __name__=="__main__":
     parser.add_argument("Path", help="Path to PLUTO data.", type=str)
     parser.add_argument("-snapshots", help="Which snapshots to animate.",required=False)
     parser.add_argument("-slc", help="Which slice to plot.", type=int,required=False)
+    parser.add_argument("-units", help="Which units to plot in.", type=str,required=False)
     parser.add_argument("-los", help="Which line-of-sight to plot a slice from.",required=False)
     parser.add_argument("-c", help="How small a subset to plot.", type=int,required=False)
-    parser.add_argument("-L_0", help="Langth unit to plot.", type=int,required=False)
-    parser.add_argument("-t_0", help="Time unit to plot.", type=int,required=False)
+    parser.add_argument("-L_0", help="Langth unit to plot.", type=str,required=False)
+    parser.add_argument("-t_0", help="Time unit to plot.", type=str,required=False)
 
     args = parser.parse_args()
 
@@ -141,6 +142,7 @@ if __name__=="__main__":
         snapshots = args.snapshots.removeprefix('[').removesuffix(']')
         snapshots = [int(s) for s in snapshots.split(',')]    
     slc = args.slc if args.slc else 0
+    units = args.units if args.units else 'code'
     los = args.los if args.los else 0
     los = int(los) if los in {'0','1','2'} else los
     c = args.c if args.c else 1
