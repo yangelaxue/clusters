@@ -2,8 +2,6 @@ import numpy as np
 import h5py, os
 from scipy.interpolate import griddata
 
-from utils.enzo import IA2, IA2Data
-
 def smooth_dm(dm,snapshot):
     
     # dm = ia2.get_val('Dark_Matter_Density',snapshot,units='code',c=20)
@@ -23,23 +21,36 @@ def smooth_dm(dm,snapshot):
         f.create_dataset(str(snapshot), data=dm_smooth)
 
 if __name__=="__main__":
+
+    import argparse, os
+    from utils.enzo import IA2, IA2Data
+
+    parser = argparse.ArgumentParser("main")
+    parser.add_argument("Path", help="Path to PLUTO data.", type=str)
+    parser.add_argument("-c", help="How small a subset to plot.", type=int,required=True)
+    parser.add_argument("-snapshots", help="Which snapshots to animate.",required=False)
+
+    args = parser.parse_args()
+    assert os.path.exists(args.Path), "First argument MUST be an existing path."
+    Path = args.Path
+    c = args.c
+    if not args.snapshots:
+        snapshots = IA2.snapshots
+    elif args.snapshots!='all':
+        snapshots = args.snapshots.removeprefix('[').removesuffix(']')
+        snapshots = [int(s) for s in snapshots.split(',')]
     
-    Paths = [
-        "/media/yange/MyDrive/2024PhDData/EnzoIA2/E14-R/",
-        # "/media/yange/MyDrive/2024PhDData/EnzoIA2/E18B-PM/",
-        # "/media/yange/MyDrive/2024PhDData/EnzoIA2/E3A-PM/",
-        # "/media/yange/MyDrive/2024PhDData/EnzoIA2/E5A-M/",
-    ]
-
-    for Path in Paths:
-        
-        ia2 = IA2Data(Path)
-
-        for s in IA2.snapshots:
-            try:
-                dm = ia2.get_val('Dark_Matter_Density',s,units='code',c=1)
-            except:
+    ia2 = IA2Data(Path)
+    tmp = []
+    fNames = ia2.get_fnames('b')
+    for s in snapshots:
+        for fName in fNames:
+            if fName.endswith(str(s)):
+                tmp.append(s)
                 continue
-            
-            print(f'Interpolating for snapshot={s}.')
-            smooth_dm(dm,s)
+    snapshots = tmp
+
+    dms = ia2.gen_vals('Dark_Matter_Density',snapshots=snapshots,units='code',c=c)
+    for s,dm in zip(snapshots,dms):
+        print(f'Interpolating for snapshot={s}.')
+        smooth_dm(dm,s)
