@@ -195,6 +195,27 @@ class IA2Data:
 
         with h5py.File(os.path.join(self.Path,'derivedfields.h5'), 'a') as f:
             f.create_dataset(f"{snapshot}/twice-specific-energy", data=v2)
+        
+    def get_fnames(self,varstr:str=None):
+        """
+        Returns list of data files in order of snapshots.
+        """
+
+        if not varstr:
+            varstr = ['dt','v','b']
+        elif type(varstr)==str:
+            varstr = [varstr]
+
+        fNames = {_varstr : [] for _varstr in varstr}
+        for fName in os.listdir(self.Path):
+            for _varstr in varstr:
+                if fName.startswith(f'8mdmd001R_{_varstr}'):
+                    fNames[_varstr].append(fName)
+        for _varstr in varstr:
+            idxes = np.argsort([int(fName[-3:]) for fName in fNames[_varstr]])
+            fNames.update({_varstr : [fNames[_varstr][idx] for idx in idxes]})
+
+        return fNames
     
 def read_hdf5(hdf5Name,varName,slc=-1,los=0,c=1):
     """
