@@ -57,7 +57,10 @@ class PlutoData:
         self.EOS = read_definitions_h(self.Path,'EOS')
         if self.EOS=='IDEAL':
             self.gamma = 5/3
-        self.FORCED_TURB = read_definitions_h(self.Path,'FORCED_TURB')
+        try:
+            self.FORCED_TURB = read_definitions_h(self.Path,'FORCED_TURB')
+        except:
+            self.FORCED_TURB = 'NO'
         if self.FORCED_TURB=='YES':
             self.FORCED_TURB_DECAY = read_definitions_h(self.Path,'FORCED_TURB_DECAY')
             self.FORCED_TURB_ENERGY = read_definitions_h(self.Path,'FORCED_TURB_ENERGY')
@@ -318,7 +321,7 @@ def read_hdf5(hdf5Name,varName,slc=-1,los=0,c=1):
 
     with h5py.File(hdf5Name, 'r') as f:
 
-        if varName in {'rho', 'prs', 'vx1', 'vx2', 'vx3', 'Bx1', 'Bx2', 'Bx3'}:
+        if varName in {'rho', 'prs', 'vx1', 'vx2', 'vx3', 'Bx1', 'Bx2', 'Bx3', 'pot'}:
             try:
                 ret = np.array(f[list(f.keys())[0]]['vars'][varName])
             except:
