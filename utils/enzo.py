@@ -107,13 +107,8 @@ class IA2Data:
             snapshots = [snapshots]
         else:
             assert type(snapshots)==list, "Given snapshots must be an integer, list or 'all'."
-
-        # if type(slcs)!=list:
-        #     slcs = [slcs,] * len(snapshots)
-        # else:
-        #     assert type(slcs)==list, "Must ensure that a list of slices is passed."
         
-        return (self.get_val(varName,snapshot=s,**kwargs) for s in zip(snapshots))
+        return (self.get_val(varName,snapshot=s,**kwargs) for s in snapshots)
 
     def get_centre(self,snapshot=None,redshift=None,_c=1):
 
