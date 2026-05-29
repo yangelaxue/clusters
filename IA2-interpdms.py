@@ -42,7 +42,7 @@ if __name__=="__main__":
     
     ia2 = IA2Data(Path)
     tmp = []
-    fNames = ia2.get_fnames('b')
+    fNames = ia2.get_fnames('dt')['dt']
     for s in snapshots:
         for fName in fNames:
             if fName.endswith(str(s)):
