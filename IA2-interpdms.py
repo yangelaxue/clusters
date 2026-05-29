@@ -17,7 +17,7 @@ def smooth_dm(dm,snapshot):
     dm_smooth[np.logical_not(np.isfinite(dm_smooth))] = 0
     dm_smooth = dm_smooth/dm_smooth.sum()*dm.sum()
 
-    with h5py.File(os.path.join(Path,'dm_smooth.hdf5'), 'a') as f:
+    with h5py.File(os.path.join(Path,f'dm_smooth_{c}.hdf5'), 'a') as f:
         f.create_dataset(str(snapshot), data=dm_smooth)
 
 if __name__=="__main__":
