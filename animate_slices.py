@@ -35,7 +35,7 @@ def plot_raw():
         ax.set_xlabel('$x$' + ' ' + L_0)
         ax.set_ylabel('$y$' + ' ' + L_0)
 
-        animate_meshgrid(vals,fig,ax,var,labels,savePath=os.path.join(savePath,var+'_slice.gif'),x=x,y=y,vmin=vmin,vmax=vmax,units=units)
+        animate_meshgrid(vals,fig,ax,var,labels,savePath=os.path.join(savePath,var+'_slice.mp4'),x=x,y=y,vmin=vmin,vmax=vmax,units=units)
     
 def plot_derived():
     """
@@ -54,7 +54,7 @@ def plot_derived():
     ax.set_aspect('equal')
     ax.set_xlabel('$x$' + ' ' + L_0)
     ax.set_ylabel('$y$' + ' ' + L_0)
-    animate_meshgrid(vals,fig,ax,'v2',labels,savePath=os.path.join(savePath,'v2'+'_slice.gif'),x=x,y=y,vmin=0,vmax=np.max(vals),units=units)
+    animate_meshgrid(vals,fig,ax,'v2',labels,savePath=os.path.join(savePath,'v2'+'_slice.mp4'),x=x,y=y,vmin=0,vmax=np.max(vals),units=units)
 
     # Animate derived vor v field
     dxdydz = pd.get_dxdydz(L_0)
@@ -146,7 +146,7 @@ if __name__=="__main__":
     los = args.los if args.los else 0
     los = int(los) if los in {'0','1','2'} else los
     c = args.c if args.c else 1
-    L_0 = args.L_0 if args.L_0 else 'kpc'
+    L_0 = args.L_0 if args.L_0 else 'code'
     t_0 = args.t_0 if args.t_0 else 'Myr'
 
     # Load class and global variables.

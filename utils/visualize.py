@@ -257,7 +257,7 @@ def get_slice(val,slc=0,los='x',c=1):
     
 #%% Animations
 
-def animate_line(y_vals,x_vals,fig,ax,labels=[],savePath='lines.gif',**_kwargs):
+def animate_line(y_vals,x_vals,fig,ax,labels=[],savePath='lines.mp4',**_kwargs):
 
     kwargs = DefaultStyle.animationkwargs | DefaultStyle.figkwargs
     kwargs.update(_kwargs)
@@ -294,7 +294,7 @@ def animate_line(y_vals,x_vals,fig,ax,labels=[],savePath='lines.gif',**_kwargs):
     anim = animation.FuncAnimation(fig,animate,interval=kwargs['interval'],frames=len(y_vals)-1)
     anim.save(savePath,dpi=kwargs['dpi'])
 
-def animate_meshgrid(vals,fig,ax,varName='',labels=[],savePath='mesh.gif', **_kwargs):
+def animate_meshgrid(vals,fig,ax,varName='',labels=[],savePath='mesh.mp4', **_kwargs):
     """
     Animates a time-ordered list of field value slices.
 
