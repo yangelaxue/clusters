@@ -73,7 +73,7 @@ def plot_derived():
     ax.set_aspect('equal')
     ax.set_xlabel('$x$' + ' ' + L_0)
     ax.set_ylabel('$y$' + ' ' + L_0)
-    animate_meshgrid(vals,fig,ax,'vor',labels,savePath=os.path.join(savePath,'vor'+'_slice.gif'),x=x,y=y,vmin=0,vmax=np.max(vals),units=units)
+    animate_meshgrid(vals,fig,ax,'vor',labels,savePath=os.path.join(savePath,'vor'+'_slice.mp4'),x=x,y=y,vmin=0,vmax=np.max(vals),units=units)
 
     if pd.PHYSICS=='MHD':
         # Animate derived B2 field
@@ -88,7 +88,7 @@ def plot_derived():
         ax.set_aspect('equal')
         ax.set_xlabel('$x$' + ' ' + L_0)
         ax.set_ylabel('$y$' + ' ' + L_0)
-        animate_meshgrid(vals,fig,ax,'B2',labels,savePath=os.path.join(savePath,'B2'+'_slice.gif'),x=x,y=y,vmin=0,vmax=np.max(vals),units=units)
+        animate_meshgrid(vals,fig,ax,'B2',labels,savePath=os.path.join(savePath,'B2'+'_slice.mp4'),x=x,y=y,vmin=0,vmax=np.max(vals),units=units)
 
         # Animate derived curlB field
         dxdydz = pd.get_dxdydz(L_0)
@@ -107,7 +107,7 @@ def plot_derived():
         ax.set_aspect('equal')
         ax.set_xlabel('$x$ kpc')
         ax.set_ylabel('$y$ kpc')
-        animate_meshgrid(vals,fig,ax,'curlB',labels,savePath=os.path.join(savePath,'curlB'+'_slice.gif'),x=x,y=y,vmin=0,vmax=np.max(vals),units=units)
+        animate_meshgrid(vals,fig,ax,'curlB',labels,savePath=os.path.join(savePath,'curlB'+'_slice.mp4'),x=x,y=y,vmin=0,vmax=np.max(vals),units=units)
 
 if __name__=="__main__":
 
@@ -141,16 +141,22 @@ if __name__=="__main__":
     elif args.snapshots!='all':
         snapshots = args.snapshots.removeprefix('[').removesuffix(']')
         snapshots = [int(s) for s in snapshots.split(',')]    
-    slc = args.slc if args.slc else 0
     units = args.units if args.units else 'code'
-    los = args.los if args.los else 0
-    los = int(los) if los in {'0','1','2'} else los
+    los = args.los if args.los else '0'
+    if los.lower()=='x': los = 0
+    elif los.lower()=='y': los = 1
+    elif los.lower()=='z': los = 2
+    elif los in {'0','1','2'}:
+        los = int(los)
+    else: raise ValueError("Line of sight (los) must be 0, 1, 2, 'x', 'y', 'z', 'X', 'Y', 'Z'")
     c = args.c if args.c else 1
     L_0 = args.L_0 if args.L_0 else 'code'
     t_0 = args.t_0 if args.t_0 else 'Myr'
 
     # Load class and global variables.
     pd = PlutoData(Path)
+    
+    slc = args.slc if args.slc else pd.shape[los]//2
 
     x, y = pd.get_x('x',L_0)[::c], pd.get_x('y',L_0)[::c]
     labels = pd.get_times(snapshots,t_0)
