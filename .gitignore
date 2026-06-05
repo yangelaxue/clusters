@@ -5,6 +5,7 @@ _*
 .ipynb_checkpoints
 *.ipynb
 IA2-toPLUTO.ipynb
+!Jnotebooks/*ipynb
 
 # virtual environment
 venv
