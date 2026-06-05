@@ -2,6 +2,8 @@
 Script that calculates important cluster properties such as critical mass and radius.
 Saves information to text as CGS units and human readable units.
 
+Saved values are: r_Delta, M_Delta, rho_Delta, c_s, t_s.
+
 Author: Angela Xue
 Date: April 2026
 """
