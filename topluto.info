@@ -4,4 +4,5 @@ Delta = 200		# Delta times critical density. Defaults to 200.
 mu = 0.5		# Mean molecular mass. Defaults to 0.5.
 radius = 0.5 		# Radius which to apodize all fields, in cluster units. Defaults to 0.5
 slope = 16.0 		# Slope of apodization, in cluster units. Defaults to 16.0
-shape_cr = (128,128,128)	# Final dimensions of cluster. Defaults to ia2.dim//c
+shape_cr = (128,128,128)	# Crop away outer edges of cluster. Defaults to ia2.dim//c
+shape_final = (128,128,128) # Final dimensions of cluster. Defaults to shape_cr

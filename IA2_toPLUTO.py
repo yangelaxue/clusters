@@ -301,7 +301,15 @@ if __name__=="__main__":
                 except:
                     shape_cr = tuple(int(sh) for sh in line.removeprefix('(').removesuffix(')').split(','))
                 continue
+            if line.startswith('shape_final'):
+                line = line.split('=')[-1]
+                try:
+                    shape_final = (int(line),)*3
+                except:
+                    shape_final = tuple(int(sh) for sh in line.removeprefix('(').removesuffix(')').split(','))
+                continue
     shape_cr = shape_cr if shape_cr else (ia2.dim//c,)*3
+    shape_final = shape_final if shape_final else shape_cr
 
     # Load important.
     centres = tuple(ia2.get_centre(s) for s in snapshots)
@@ -368,24 +376,34 @@ if __name__=="__main__":
     vxs_cr = (crop_domain(shape_cr,val) for val in vxs_apd)
     gravpots_cr = (crop_domain(shape_cr,val)-val.max() for val in gravpots)
 
+    #%% Interpolate to final shape.
+    if shape_final==shape_cr:
+        vals_final = vals_cr
+        vxs_final = vxs_cr
+        gravpots_final = gravpots_cr
+    else:
+        vals_final = (interpolate(shape_final,val) for val in vals_cr)
+        vxs_final = (interpolate(shape_final,val) for val in vxs_cr)
+        gravpots_final = (interpolate(shape_final,val) for val in gravpots_cr)
+
     #%% Save fields. Final loop through all values.
-    n_points = np.prod(shape_cr)
+    n_points = np.prod(shape_final)
 
     # Save fields besides (non) shifted velocity.
-    for varName,val in zip(varNames,vals_cr):
+    for varName,val in zip(varNames,vals_final):
         if varName=='prs':
             prs_min = val[val>0].min()*p_0 # Save minimum pressure value.
         with open(os.path.join(savePath, f'{varName}0.dbl'),'wb') as f_o:   
             f_o.write(struct.pack('<'+'d'*n_points,*(val.T.flatten())))
     
     # Save shifted velocities
-    rho = next(vxs_cr)
-    vxs_sh = (vx-calc_avgvelocity(rho,vx) for vx in vxs_cr)
+    rho = next(vxs_final)
+    vxs_sh = (vx-calc_avgvelocity(rho,vx) for vx in vxs_final)
     for i,vx in enumerate(vxs_sh):
         with open(os.path.join(savePath, f'vx{i+1}0.dbl'),'wb') as f_o:   
             f_o.write(struct.pack('<'+'d'*n_points,*(vx.T.flatten())))
     # Save gravitational potentials
-    for i,val in enumerate(gravpots_cr):
+    for i,val in enumerate(gravpots_final):
         with open(os.path.join(savePath, f'pot{i}0.dbl'),'wb') as f_o:   
             f_o.write(struct.pack('<'+'d'*n_points,*(val.T.flatten())))
     
@@ -396,10 +414,10 @@ if __name__=="__main__":
     with open(os.path.join(savePath, 'grid0.out'),'w') as f_o:
         f_o.write("# GEOMETRY:   CARTESIAN\n")
         for d in range(DIM):
-            f_o.write(f"{shape_cr[d]}\n")
-            for i in range(shape_cr[d]):
-                xL = -0.5 + (i-0.5)/(shape_cr[d] - 1.)
-                xR = -0.5 + (i+0.5)/(shape_cr[d] - 1.)
+            f_o.write(f"{shape_final[d]}\n")
+            for i in range(shape_final[d]):
+                xL = -0.5 + (i-0.5)/(shape_final[d] - 1.)
+                xR = -0.5 + (i+0.5)/(shape_final[d] - 1.)
                 xL *= L[d]
                 xR *= L[d]
                 f_o.write("{:d}   {:12.6e}  {:12.6e}\n".format(i+1, xL, xR))
@@ -413,7 +431,7 @@ if __name__=="__main__":
         info.write(f"rho_0 = {rho_0}\n")
         info.write(f"L_0 = {L_0}\n")
         info.write(f"v_0 = {v_0}\n")
-        info.write(f"shape = {shape_cr}\n")
+        info.write(f"shape = {shape_final}\n")
         info.write("\n")
         info.write(f"rho_cr = {rho_min/rho_0}\n")
         info.write(f"prs_cr = {prs_min/p_0}\n")
