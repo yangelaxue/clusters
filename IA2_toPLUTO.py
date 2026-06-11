@@ -175,6 +175,18 @@ def crop_domain(shape_cr,val):
 
     return val[slices]
 
+def get_times():
+    from astropy.cosmology import FlatLambdaCDM
+    import astropy.units as u
+    cosmo = FlatLambdaCDM(H0=IA2.h_0*100*u.km/u.s/u.Mpc, Om0=IA2.Omega_dm0+IA2.Omega_bm0)
+
+    times = []
+    for s in snapshots:
+        z = get_redshift(s)
+        times.append(cosmo.age(z).value*(1e9*CGS.yr))
+    times = np.array(times)
+    return times-times.min()
+
 def plot():
 
     plotNames = ['vx1','vx2','vx3','Bx1','Bx2','Bx3','rho','prs']
@@ -394,6 +406,7 @@ if __name__=="__main__":
 
     #%% Save information.
     rho_min = rho_cr_z(get_redshift(snapshots[0]))
+    times = get_times()
     # prs_min = rho_cr/CGS.mp * CGS.kB * 2.75
     with open(os.path.join(savePath,'info.txt'),'w') as info:
         info.write(f"L = {np.array(L)/L_0}, L/2 = {np.array(L)/L_0/2}\n")
@@ -404,6 +417,8 @@ if __name__=="__main__":
         info.write("\n")
         info.write(f"rho_cr = {rho_min/rho_0}\n")
         info.write(f"prs_cr = {prs_min/p_0}\n")
+        info.write("\n")
+        info.write(f"times = {times/t_0}\n")
 
     # Load everything and plot.
     plot()
