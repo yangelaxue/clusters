@@ -1,5 +1,6 @@
 # temp files
 _*
+!**/__init__.py
 
 # Jupyter Notebooks
 .ipynb_checkpoints
