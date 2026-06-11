@@ -255,10 +255,10 @@ if __name__=="__main__":
     #%% Load cluster class and information.
 
     IA2Paths = {
-        "E14" : "/media/yange/MyDrive/2024PhDData/EnzoIA2/E14",
-        "E18B" : "/media/yange/MyDrive/2024PhDData/EnzoIA2/E18B",
-        "E3A" : "/media/yange/MyDrive/2024PhDData/EnzoIA2/E3A",
-        "E5A" : "/media/yange/MyDrive/2024PhDData/EnzoIA2/E5A",
+        "E14" : os.path.join(os.environ['IA2_DIR'],"E14"),
+        "E18B" : os.path.join(os.environ['IA2_DIR'],"E18B"),
+        "E3A" : os.path.join(os.environ['IA2_DIR'],"E3A"),
+        "E5A" : os.path.join(os.environ['IA2_DIR'],"E5A"),
     }
     ia2 = IA2Data(IA2Paths[cluster])
 
@@ -368,10 +368,6 @@ if __name__=="__main__":
     
     # Save shifted velocities
     rho = next(vxs_cr)
-    # vxs_sh = []
-    # for vx in vxs_cr:
-    #     sh = calc_avgvelocity(rho,vx)
-    #     vxs_sh.append(vx-sh)
     vxs_sh = (vx-calc_avgvelocity(rho,vx) for vx in vxs_cr)
     for i,vx in enumerate(vxs_sh):
         with open(os.path.join(savePath, f'vx{i+1}0.dbl'),'wb') as f_o:   
