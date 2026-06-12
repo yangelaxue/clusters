@@ -195,7 +195,7 @@ def plot():
     def load_vals():
         for varName in plotNames:
             with open(os.path.join(savePath, f'{varName}0.dbl'),'rb') as f_o:
-                val = np.array(struct.unpack('<'+'d'*n_points,f_o.read())).reshape(shape_cr).T
+                val = np.array(struct.unpack('<'+'d'*n_points,f_o.read())).reshape(shape_final).T
             yield val
     vals = load_vals()
 
@@ -208,7 +208,7 @@ def plot():
         ax.set_xticks([])
         ax.set_yticks([])
         ax.set_title(varName)
-        val = val[shape_cr[0]//2]
+        val = val[shape_final[0]//2]
         norm = None
         if varName in {'rho','dm','prs'}: #TODO
             norm = LogNorm()
