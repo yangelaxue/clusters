@@ -418,8 +418,8 @@ if __name__=="__main__":
             for i in range(shape_final[d]):
                 xL = -0.5 + (i-0.5)/(shape_final[d] - 1.)
                 xR = -0.5 + (i+0.5)/(shape_final[d] - 1.)
-                xL *= L[d]
-                xR *= L[d]
+                xL *= L[d]/L_0
+                xR *= L[d]/L_0
                 f_o.write("{:d}   {:12.6e}  {:12.6e}\n".format(i+1, xL, xR))
 
     #%% Save information.
