@@ -1,3 +1,8 @@
+"""
+Interpolates the Dark Matter field of ENZO Itasca IA2 clusters as to smooth it.
+It is not in use.
+"""
+
 import numpy as np
 import h5py, os
 from scipy.interpolate import griddata
