@@ -10,6 +10,7 @@ import numpy as np
 import h5py, os
 from utils.units import CGS
 from utils.clusters import calc_centreofmass
+import socket
 
 class IA2:
 
@@ -25,7 +26,7 @@ class IA2:
     cv = 6.47e9
     cb = (cd*4*np.pi)**.5 * cv
     dL = 3.95 # comoving kpc
-    dim = 1280
+    # dim = 1280
     gamma = 5/3
 
     fields = (
@@ -42,17 +43,24 @@ class IA2:
 
     snapshots = (3,4,5,6,7,8,9,10,11,12,13,14,15)
     redshifts = (2,1,0.9,0.8,0.7,0.6,0.5,0.4,0.3,0.2,0.1,0.02,0.01)
-    hdf5Name = '8mdmd001R_{}_{}'
+    hdf5Name = "8mdmd001R_{}_{}"
+
+    if socket.gethostname()=='yange':
+        Path = "/media/yange/MyDrive/2024PhDData/EnzoIA2/"
+    elif socket.gethostname()=="login03.hpc.nesi.org.nz":
+        Path = "/home/xuean/00_nesi_projects/vuw04655_nobackup/IA2"
+    else:
+        print(f"System {socket.gethostname()} is not recognised.")
 
 class IA2Data:
 
-    def __init__(self,Path):
-        self.Path = Path
+    def __init__(self,Cluster):
+        self.Path = os.path.join(IA2.Path,Cluster)
 
-        if 'E3A' in self.Path or 'E3A' in os.getcwd().split('/')[-1]:
+        if Cluster=='E3A':
             self.dim = 1024
         else:
-            self.dim = IA2.dim
+            self.dim = 1280
 
     def get_val(self,varName,snapshot=None,redshift=None,slc=-1,los=0,c=1,units='cgs'):
         """

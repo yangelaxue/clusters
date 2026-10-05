@@ -32,6 +32,7 @@ from matplotlib import rc, animation
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import os
+import socket
 
 import cmasher as cmr
 
@@ -195,11 +196,13 @@ def set_style():
 
     fontsize = 10
 
-    if os.environ['USER']=='yange':
+    if socket.gethostname()=='yange':
         rc('font', **{'family': 'serif', 'serif': ['Computer Modern'], 'size': fontsize})
         rc('text', usetex=True)
-    else:
+    elif socket.gethostname()=="login03.hpc.nesi.org.nz":
         rc('font', **{'size': fontsize})
+    else:
+        print(f"System {socket.gethostname()} is not recognised.")
     rc('axes', **{'titlesize': fontsize})
 
     plt.rcParams['axes.axisbelow'] = True
