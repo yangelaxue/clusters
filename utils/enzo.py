@@ -47,7 +47,7 @@ class IA2:
 
     if socket.gethostname()=='yange':
         Path = "/media/yange/MyDrive/2024PhDData/EnzoIA2/"
-    elif socket.gethostname()=="login03.hpc.nesi.org.nz":
+    elif "nesi" in socket.gethostname():
         Path = "/home/xuean/00_nesi_projects/vuw04655_nobackup/IA2"
     else:
         print(f"System {socket.gethostname()} is not recognised.")
