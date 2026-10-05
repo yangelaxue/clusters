@@ -302,7 +302,9 @@ if __name__=="__main__":
 
     # Save grid.
     DIM = 3
-    L = tuple(dL*sh for sh in shape_cr)
+    # L = tuple(dL*sh for sh in shape_cr)
+    L = (L_max,)*3
+    print(L_max/L_0)
     with open(os.path.join(savePath, 'grid0.out'),'w') as f_o:
         f_o.write("# GEOMETRY:   CARTESIAN\n")
         for d in range(DIM):
