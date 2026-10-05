@@ -296,6 +296,7 @@ if __name__=="__main__":
             f_o.write(struct.pack('<'+'d'*n_points,*(val.T.flatten())))
     # Save potentials velocities
     for i,val in enumerate(pot_final):
+        val -= val.min()
         with open(os.path.join(savePath, f'pot{i}0.dbl'),'wb') as f_o:
             f_o.write(struct.pack('<'+'d'*n_points,*(val.T.flatten())))
 
