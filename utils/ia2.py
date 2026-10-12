@@ -58,7 +58,7 @@ class IA2:
     # Define path for the clusters
     if os.uname().nodename=="yange":
         Path = "/media/yange/MyDrive/2024PhDData/EnzoIA2/"
-    elif "nesi" in os.uname().nodemname:
+    elif "nesi" in os.uname().nodename:
         Path = "/home/xuean/00_nesi_projects/vuw04655_nobackup/IA2"
     else:
         raise SystemError("There is no path for the ENZO Itasca IA2 clusters in this system.")
