@@ -1,6 +1,5 @@
 """
 Functions to calculate gradients either using stencils or Fourier transforms.
-Rewritten from a November 2022 code from Masters project for readability.
 
 Functions
 ---------
@@ -14,13 +13,14 @@ Functions
         Calculates the inverse Laplace transform os a field with Fourier and inverse transform.
 
 Author: Angela Xue
-Date: March 2026
+Date: November 2022
+Revised: March 2026 for readibility
 """
 
 import numpy as np
 from scipy.fftpack import fftn, ifftn
 
-def gradient_discrete(field, dxdydz=None, stencil:int=3):
+def gradient_discrete(field,dxdydz=None,stencil:int=3):
     """
     Calculates the gradient of a field of any dimensions using a 3, 5, 7 or 9 point
         stencil. This function assumes periodic boundary conditions and even spacing
@@ -193,7 +193,7 @@ def lapl_discrete(field,dxdydz=(1,1,1)):
         
     return lapl
 
-def gradient_FT(field, dxdydz=None):
+def gradient_FT(field,dxdydz=None):
     """
     Calculates the gradient of a field by Fourier transforming and inverse Fourier transformaing.
     """
@@ -213,7 +213,7 @@ def gradient_FT(field, dxdydz=None):
     
     return gradient
 
-def invlapl_FT(field, dxdydz=None):
+def invlapl_FT(field,dxdydz=None):
     """
     Given a field f and the equation
             \\nabla^2 V = f
@@ -238,7 +238,7 @@ def invlapl_FT(field, dxdydz=None):
     
     return lapl
 
-def curl_discrete(vx, vy, vz=None, dxdydz=None):
+def curl_discrete(vx,vy,vz=None,dxdydz=None):
     """
     Calculates the curl of a vector field. Defined for 2 and 3 dimensions.
 

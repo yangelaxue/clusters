@@ -6,12 +6,10 @@ Author: Angela Xue
 Date: March 2026
 """
 
-#%% Imports.
-
 from numpy import pi
-from gradient import invlapl_FT, gradient_FT, gradient_discrete
+from utils.gradient import invlapl_FT, gradient_FT, gradient_discrete
 
-def get_gravpot(rho, dxdydz=None, G=1.):
+def calc_gravpot(rho,dxdydz=None,G=1.):
     """
     Calculates the gravitational potential field energy density field.
     Aside: if inputs are given in natural units, the potential is measured in units of c^2.
@@ -19,7 +17,7 @@ def get_gravpot(rho, dxdydz=None, G=1.):
     Parameters
     ----------
     rho : np.ndarray
-        Density field values..
+        Density field values.
     dxdydz : iterable
         Step size between different values of field, one iterable for each dimension.
     G : float, optional
@@ -36,7 +34,7 @@ def get_gravpot(rho, dxdydz=None, G=1.):
     
     return potential
 
-def get_gravforce_from_pot(potential,dxdydz,stencil=None):
+def calc_gravforce_from_pot(potential,dxdydz,stencil=None):
     """
     Calculate the gravitational vector field given gravitational potential in
     cartesian coordinates by taking the gradient of said potential field.
@@ -54,6 +52,7 @@ def get_gravforce_from_pot(potential,dxdydz,stencil=None):
         List of gravitational accceleration in the x, y and z directions respectively.
     """
 
+    #TODO where are the multipliers?
     if stencil:
         return [-gradient for gradient in gradient_discrete(potential,dxdydz,stencil)]
     else:
