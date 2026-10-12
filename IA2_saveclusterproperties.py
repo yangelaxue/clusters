@@ -96,8 +96,9 @@ if __name__=="__main__":
     # Parse arguments.
     import argparse
     parser = argparse.ArgumentParser("main")
-    parser.add_argument("cluster", help="Which ENZO Itasca IA2 cluster to save the properties for.", type=str)
-    parser.add_argument("-DEBUG", help="Which ENZO Itasca IA2 cluster to save the properties for.", type=str)
+    parser.add_argument("cluster", help="Which ENZO Itasca IA2 cluster to save the properties for.",type=str)
+    parser.add_argument("-DEBUG", help="Switch to debug mode.",type=bool)
+    parser.add_argument("-c",type=int)
     args = parser.parse_args()
     cluster = args.cluster
     DEBUG = args.DEBUG
@@ -106,9 +107,8 @@ if __name__=="__main__":
     c = 1
     snapshots = IA2.snapshots[ia2.cluster]
 
-    if DEBUG: # DEBUG
-        c = 40
-        # snapshots = (3,10,11,12,)
+    if DEBUG:
+        c = args.c if args.c else 10
         snapshots = IA2.snapshots[ia2.cluster]
 
     save_centerofmass_indices(ia2)
