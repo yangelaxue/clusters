@@ -322,41 +322,76 @@ def get_probabilitydensityfunction(val,weight,inc=0,axis=0,normalise=False):
 
 
 
-from functools import reduce
-import operator
+# from functools import reduce
+# import operator
 
-def calc_pdf(ar,min=99999,max=99999,weight=100,inc=0,ax=0,Normalized=False):
-    if len(ar) == 0:
-      print('No array provided! Exiting!')
-      return
-    if min == 99999:
-      min=ar.min()
-    if max == 99999:
-      max=ar.max()
-   # If PDF of increment, then increment the array
-    if inc:
-      ar -= np.roll(ar,inc,axis=ax)
-#    # Find the total length of data set
-    arsize=ar.size
-#    # Find the RMS value of data set and normalize to it.
-    if Normalized == True:
-      rmsval = np.sqrt(np.mean((ar-np.mean(ar))**2))
-      if rmsval != 0:
-         ar = ar/rmsval
-#    # Reshape the array to 1D & sort it.
-    arr=ar.flatten()
-    print(arr)
-    arr = np.sort(arr,kind='heapsort')
-    print(arr)
-#    # Empty arrays for output
-#    bins=int(arsize/weight); pdf=np.zeros(bins); binvals=np.zeros(bins)
-#    # Fill the bins 
-#    for i in range(bins):
-#       start=i*weight
-#       binvals[i] = np.mean(arr[start:start+weight])
-#       pdf[i] = weight/(arr[start:start+weight].max()-arr[start:start+weight].min())
-#    pdf = pdf/arsize
-#    return binvals,pdf
+# def calc_pdf(ar,min=99999,max=99999,weight=100,inc=0,ax=0,Normalized=False):
+#     if len(ar) == 0:
+#       print('No array provided! Exiting!')
+#       return
+#     if min == 99999:
+#       min=ar.min()
+#     if max == 99999:
+#       max=ar.max()
+#    # If PDF of increment, then increment the array
+#     if inc:
+#       ar -= np.roll(ar,inc,axis=ax)
+# #    # Find the total length of data set
+#     arsize=ar.size
+# #    # Find the RMS value of data set and normalize to it.
+#     if Normalized == True:
+#       rmsval = np.sqrt(np.mean((ar-np.mean(ar))**2))
+#       if rmsval != 0:
+#          ar = ar/rmsval
+# #    # Reshape the array to 1D & sort it.
+#     arr=ar.flatten()
+#     print(arr)
+#     arr = np.sort(arr,kind='heapsort')
+#     print(arr)
+# #    # Empty arrays for output
+# #    bins
+# from functools import reduce
+# import operator
+
+# def calc_pdf(ar,min=99999,max=99999,weight=100,inc=0,ax=0,Normalized=False):
+#     if len(ar) == 0:
+#       print('No array provided! Exiting!')
+#       return
+#     if min == 99999:
+#       min=ar.min()
+#     if max == 99999:
+#       max=ar.max()
+#    # If PDF of increment, then increment the array
+#     if inc:
+#       ar -= np.roll(ar,inc,axis=ax)
+# #    # Find the total length of data set
+#     arsize=ar.size
+# #    # Find the RMS value of data set and normalize to it.
+#     if Normalized == True:
+#       rmsval = np.sqrt(np.mean((ar-np.mean(ar))**2))
+#       if rmsval != 0:
+#          ar = ar/rmsval
+# #    # Reshape the array to 1D & sort it.
+#     arr=ar.flatten()
+#     print(arr)
+#     arr = np.sort(arr,kind='heapsort')
+#     print(arr)
+# #    # Empty arrays for output
+# #    bins=int(arsize/weight); pdf=np.zeros(bins); binvals=np.zeros(bins)
+# #    # Fill the bins 
+# #    for i in range(bins):
+# #       start=i*weight
+# #       binvals[i] = np.mean(arr[start:start+weight])
+# #       pdf[i] = weight/(arr[start:start+weight].max()-arr[start:start+weight].min())
+# #    pdf = pdf/arsize
+# #    return =int(arsize/weight); pdf=np.zeros(bins); binvals=np.zeros(bins)
+# #    # Fill the bins 
+# #    for i in range(bins):
+# #       start=i*weight
+# #       binvals[i] = np.mean(arr[start:start+weight])
+# #       pdf[i] = weight/(arr[start:start+weight].max()-arr[start:start+weight].min())
+# #    pdf = pdf/arsize
+# #    return binvals,pdf
 
 def main():
 
