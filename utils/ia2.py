@@ -54,10 +54,11 @@ class IA2:
 
 class IA2Data:
 
-    def __init__(self,Cluster):
-        self.Path = os.path.join(IA2.Path,Cluster)
+    def __init__(self,cluster):
+        self.Path = os.path.join(IA2.Path,cluster)
+        self.cluster = cluster
 
-        if Cluster=='E3A':
+        if cluster=='E3A':
             self.dim = 1024
         else:
             self.dim = 1280
