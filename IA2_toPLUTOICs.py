@@ -184,7 +184,7 @@ if __name__=="__main__":
     import os, struct
 
     from utils.ia2 import IA2, IA2Data
-    from utils.cluster import calc_avgvelocity
+    from utils.clusters import calc_avgvelocity
     from utils.gravity import calc_gravpot
 
     # Parse arguments

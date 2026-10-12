@@ -18,7 +18,8 @@ from utils.units import CGS
 def save_centerofmass_indices(ia2):
     """ Calculate centre of mass indices. """
 
-    from utils.clusters import calc_centreofmass
+    # from utils.clusters import calc_centreofmass
+    from scipy.ndimage import center_of_mass
     rho_gen = ia2.gen_vals("Density",snapshots=snapshots,c=c)
     dm_gen = ia2.gen_vals("Dark_Matter_Density",snapshots=snapshots,units="code",c=c)
     line = "{:02d} {:4.1f} {:4.1f} {:4.1f}\n"
@@ -26,8 +27,9 @@ def save_centerofmass_indices(ia2):
         f.write("s  idx   idy   idz\n")
         for s, rho, dm in zip(snapshots,rho_gen,dm_gen):
             dens = rho + dm
-            centre = calc_centreofmass(dens)
-            print(line.format(s,*centre))
+            centre = center_of_mass(dens)
+            # centre = calc_centreofmass(dens)
+            # print(line.format(s,*centre))
             f.write(line.format(s,*centre))
 
 def save_centredensity(ia2):
