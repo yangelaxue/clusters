@@ -97,14 +97,16 @@ if __name__=="__main__":
     import argparse
     parser = argparse.ArgumentParser("main")
     parser.add_argument("cluster", help="Which ENZO Itasca IA2 cluster to save the properties for.", type=str)
+    parser.add_argument("-DEBUG", help="Which ENZO Itasca IA2 cluster to save the properties for.", type=str)
     args = parser.parse_args()
     cluster = args.cluster
+    DEBUG = args.DEBUG
 
     ia2 = IA2Data(cluster)
     c = 1
     snapshots = IA2.snapshots[ia2.cluster]
 
-    if 0: # DEBUG
+    if DEBUG: # DEBUG
         c = 40
         # snapshots = (3,10,11,12,)
         snapshots = IA2.snapshots[ia2.cluster]
