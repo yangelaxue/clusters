@@ -1,16 +1,46 @@
 """
 Integrate raw data along a line of sight to calculate either the X-ray surface brightness or Compton-y SZ surface brightness.
 
+Functions
+---------
+
+    get_XraySB()
+
+    get_SZSB()
+
 Author: Angela Xue
 Date: Oct 2025
+Revised: Oct 2026 -- combined dependent functions.
 """
 
+import numpy as np
+import os
+from scipy.interpolate import CubicSpline
 from scipy.integrate import simpson
 
-from utils.cooling_function import get_CoolingFunction
 from utils.units import CGS
 
-def get_xraySB(rho, prs=None, T=None, mu=1., Z=0.3, dx=1.,los='x'):
+def get_CoolingFunction(Z):
+    """
+    Return cooling function.
+
+    Metallicity, in units of solar metallicity.
+    Z = 0.3, 1.0, 3.0
+    """
+
+    cooltab_fname = os.path.join(os.environ['PLUTO_DIR'],'Src/Cooling/TABULATED/cooltab_z03z3.dat')
+    if float(Z)==0.3:
+        T_arr, cool_arr = np.loadtxt(cooltab_fname,usecols=(0,1),skiprows=1)[:-1].T
+    elif float(Z)==1.0:
+        T_arr, cool_arr = np.loadtxt(cooltab_fname,usecols=(0,2),skiprows=1)[:-1].T
+    elif float(Z)==3.0:
+        T_arr, cool_arr = np.loadtxt(cooltab_fname,usecols=(0,3),skiprows=1)[:-1].T
+    else:
+        ValueError("Z must be 0.3, 1.0 or 3.0.")
+    
+    return CubicSpline(T_arr, cool_arr)
+
+def get_XraySB(rho,prs=None,T=None,mu=1.,Z=0.3,dx=1.,los='x'):
     """
     Given field values and line-of-sight, integrate to calculate the X-ray surface brightness.
     Gives the CGS surface brightness value if inputs are in CGS units.
@@ -21,7 +51,7 @@ def get_xraySB(rho, prs=None, T=None, mu=1., Z=0.3, dx=1.,los='x'):
         Density field.
     prs, T : np.ndarray
         Pressure and temperature fields, respectively.
-        Must provide at leasr one of these.
+        Must provide at least one of these.
     mu : float
         Mean molecular mass.
     Z : float.
@@ -53,7 +83,7 @@ def get_xraySB(rho, prs=None, T=None, mu=1., Z=0.3, dx=1.,los='x'):
 
     return SB
 
-def get_SZSB(prs, dx=1., los='x'):
+def get_SZSB(prs,dx=1.,los='x'):
     """
     Given field values and line-of-sight, integrate to calculate the X-ray surface brightness.
     Gives the CGS surface brightness value if inputs are in CGS units.

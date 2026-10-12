@@ -6,6 +6,8 @@ Functions
     calc_strain, calc_stress
         Calculate the strain and stress of a fluid, respectively.
 
+Author: Angela Xue
+Date: October 2026
 """
 
 import numpy as np
