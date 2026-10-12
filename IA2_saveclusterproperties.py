@@ -114,5 +114,5 @@ if __name__=="__main__":
         snapshots = IA2.snapshots[ia2.cluster]
 
     save_centerofmass_indices(ia2)
-    # save_centredensity(ia2)
-    # save_clusterunits(ia2)
+    save_centredensity(ia2)
+    save_clusterunits(ia2)
