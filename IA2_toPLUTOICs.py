@@ -12,7 +12,7 @@ from utils.units import CGS
 def read_topluto(Path):
     """ Reads the topluto.info file to determine parameters used to convert raw data to PLUTO ICs. """
     global c, Delta, mu, apd_radius, apd_slope, L_final, shape_final
-    c, Delta, mu, apd_radius, apd_slope, L_final, shape_final = 40, 200, 0.5, 0.5, 16., 3.0, ()
+    c, Delta, mu, apd_radius, apd_slope, L_final, shape_final = 40, 200, 0.5, 0.5, 16., 3.0, (64,64,64)
     with open(os.path.join(Path,'topluto.info'),'r') as info:
         for line in info.readlines():
             line = line.split('#')[0].replace(" ","").replace("\n","").replace("\t","")
@@ -137,7 +137,7 @@ def generate_dens():
         val = ia2.get_val('Density',s,c=c) + ia2.get_val('Dark_Matter_Density',s,c=c)
         yield val / rho_0
 
-def plot():
+def plot(los):
     """ Plot the final apodised fields. """
     from matplotlib.colors import LogNorm
     from utils.visualise import Style, get_slice
@@ -162,7 +162,7 @@ def plot():
         ax.set_xticks([])
         ax.set_yticks([])
         ax.set_title(varkwargs["title"])
-        val = get_slice(val,slc=val.shape[0]//2,los='x',c=1)
+        val = get_slice(val,slc=val.shape[0]//2,los=los,c=1)
         norm = None
         if varName in {'rho','dm','prs'}: #TODO
             norm = LogNorm()
@@ -176,7 +176,7 @@ def plot():
         cbar = Style.get_cbar(im,fig,ax,size=.1)
         # cbar.ax.set_title()
 
-    plt.savefig(os.path.join(savePath,'cluster.png'),dpi=300)
+    plt.savefig(os.path.join(savePath,f'cluster_{los}.png'),dpi=300)
     plt.show()
 
 if __name__=="__main__":
@@ -315,4 +315,6 @@ if __name__=="__main__":
         info.write("\n")
         info.write(f"times = {times/t_0}\n")()
 
-    plot()
+    plot('x')
+    plot('y')
+    plot('z')
