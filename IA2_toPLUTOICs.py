@@ -94,7 +94,7 @@ def apodize(val,radius,slope,dL):
     ret = val * 1/(1+np.exp(slope*(R-radius)))
     return ret
 
-def crop_domain(shape_cr,val):
+def crop_domain(val,shape_cr):
     """ Crop a domain about the grid centre. """
     slices = []
     for sh_cr,sh in zip(shape_cr,val.shape):
