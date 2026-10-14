@@ -240,14 +240,12 @@ if __name__=="__main__":
     rho_inp = next(rhovxs_inp)
     vxs_sh = (vx-calc_avgvelocity(rho_inp,vx) for vx in rhovxs_inp)
     rhovxs_sh = (rho_inp if Name=="rho" else next(vxs_sh) for Name in rhovxNames)
-    for i,val in enumerate(rhovxs_sh):
-        print("LOOK HERE",i)
     # Calculate gravitational potentials.
     pot = (calc_gravpot(dens,(dL,)*3,G=G_0) for dens in dens_inp)
 
     # Apodize all fields
     vals_apd = (apodize(val,apd_radius,apd_slope,dL) for val in vals_inp)
-    vxs_apd = (apodize(val,apd_radius,apd_slope,dL) for val in vxs_sh)
+    vxs_apd = (apodize(val,apd_radius,apd_slope,dL) for val in rhovxs_sh)
     # Crop all fields
     shape_cr = (int(L_final//dL),)*3
     vals_cr = (crop_domain(val,shape_cr) for val in vals_apd)
