@@ -261,7 +261,7 @@ if __name__=="__main__":
     for varName,val in zip(varNames,vals_final):
         with open(os.path.join(savePath, f'{varName}0.dbl'),'wb') as f_o:
             f_o.write(struct.pack('<'+'d'*n_points,*(val.T.flatten())))
-    for varName,val in zip(rhovxNames[1:],vxs_final):
+    for varName,val in zip(rhovxNames,vxs_final):
         with open(os.path.join(savePath, f'{varName}0.dbl'),'wb') as f_o:
             f_o.write(struct.pack('<'+'d'*n_points,*(val.T.flatten())))
     # Save potentials velocities
