@@ -252,7 +252,7 @@ if __name__=="__main__":
     vals_apd = (apodize(val,apd_radius,apd_slope,dL) for val in vals_inp)
     vxs_apd = (apodize(val,apd_radius,apd_slope,dL) for val in vxs_sh)
     # Crop all fields
-    shape_cr = (L_final//L_max,)*3
+    shape_cr = (int(L_final//dL),)*3
     vals_cr = (crop_domain(val,shape_cr) for val in vals_apd)
     vxs_cr = (crop_domain(val,shape_cr) for val in vxs_apd)
     pot_cr = (crop_domain(val,shape_cr) for val in pot)
