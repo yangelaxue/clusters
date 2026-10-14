@@ -97,11 +97,14 @@ def apodize(val,radius,slope,dL):
 def crop_domain(val,shape_cr):
     """ Crop a domain about the grid centre. """
     slices = []
-    for sh_cr,sh in zip(shape_cr,val.shape):
+    for sh,sh_cr in zip(val.shape,shape_cr):
+        print(sh,sh_cr)
         cr = (sh-sh_cr)//2
         slices.append(slice(cr,sh_cr+cr))
-        print(slices)
+        # print(slices)
     slices = tuple(slices)
+    val = val[slices]
+    print("success")
     return val[slices]
 
 def generate_vals(varNames):
