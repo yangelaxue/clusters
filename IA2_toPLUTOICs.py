@@ -311,7 +311,7 @@ if __name__=="__main__":
         # info.write(f"rho_cr = {rho_min/rho_0}\n")
         # info.write(f"prs_cr = {prs_min/p_0}\n")
         info.write("\n")
-        info.write(f"times = {times/t_0}\n")()
+        info.write(f"times = {times/t_0}\n")
 
     plot('x')
     plot('y')
