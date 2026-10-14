@@ -173,6 +173,7 @@ def plot(los):
 
         cmap = varkwargs["cmap"]
         im = ax.pcolormesh(val,cmap=cmap,vmin=vmin,vmax=vmax,norm=norm)
+        print(varName,vmin,vmax,norm)
         cbar = Style.get_cbar(im,fig,ax,size=.1)
         # cbar.ax.set_title()
 
