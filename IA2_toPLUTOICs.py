@@ -153,8 +153,8 @@ def plot(los):
             yield val
     vals = load_vals()
 
-    nrows = 3*np.ceil(len(plotNames)/3)
-    fig = plt.figure(figsize=(10,nrows),tight_layout=True)
+    nrows = int(np.ceil(len(plotNames)/3))
+    fig = plt.figure(figsize=(10,nrows*3),tight_layout=True)
     for i,(varName,val) in enumerate(zip(plotNames,vals)):
         varkwargs = Style.get_varkwargs(varName)
         ax = fig.add_subplot(nrows,3,i+1)
