@@ -100,6 +100,7 @@ def crop_domain(val,shape_cr):
     for sh_cr,sh in zip(shape_cr,val.shape):
         cr = (sh-sh_cr)//2
         slices.append(slice(cr,sh_cr+cr))
+        print(slices)
     slices = tuple(slices)
     return val[slices]
 
