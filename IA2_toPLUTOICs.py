@@ -164,12 +164,12 @@ def plot(los):
         ax.set_title(varkwargs["title"])
         val = get_slice(val,slc=val.shape[0]//2,los=los,c=1)
         norm = None
+        vmin, vmax = None, None
         if varName in {'rho','dm','prs'}: #TODO
             norm = LogNorm()
         if varName.startswith('vx') or varName.startswith('Bx'):
             vmax = np.abs(val).max()
             vmin = -vmax
-        else: vmin, vmax = None, None
 
         cmap = varkwargs["cmap"]
         im = ax.pcolormesh(val,cmap=cmap,vmin=vmin,vmax=vmax,norm=norm)
