@@ -70,7 +70,6 @@ def extend_domain(val,shape_ext,centre):
     for d in range(len(shape_init)):
         slices.append(slice(center_ext[d]-centre[d],center_ext[d]+shape_init[d]-centre[d]))
     slices = tuple(slices)
-    print(shape_ext,centre,slices)
     ret = np.zeros(shape_ext)
     ret[slices] += val
     return ret
@@ -98,13 +97,10 @@ def crop_domain(val,shape_cr):
     """ Crop a domain about the grid centre. """
     slices = []
     for sh,sh_cr in zip(val.shape,shape_cr):
-        print(sh,sh_cr)
         cr = (sh-sh_cr)//2
         slices.append(slice(cr,sh_cr+cr))
-        # print(slices)
     slices = tuple(slices)
     val = val[slices]
-    print("success")
     return val[slices]
 
 def generate_vals(varNames):
@@ -211,7 +207,6 @@ if __name__=="__main__":
 
     # Load time varying cluster properties
     centres = tuple(ia2.get_centre(s,c=c) for s in snapshots)
-    print(centres)
     redshifts = tuple(IA2.get_redshift(s) for s in snapshots)
     dLs = tuple(IA2.dL * c / (1+z) / L_0 for z in redshifts)
 
@@ -277,7 +272,6 @@ if __name__=="__main__":
     # Save grid.
     DIM = 3
     L = (shape_cr[0]*dL,)*3
-    print(L_max/L_0)
     with open(os.path.join(savePath, 'grid0.out'),'w') as f_o:
         f_o.write("# GEOMETRY:   CARTESIAN\n")
         for d in range(DIM):
@@ -293,7 +287,7 @@ if __name__=="__main__":
     H2_a = lambda a : IA2.H_0**2 * (IA2.Omega_r0/a**4 + (IA2.Omega_bm0+IA2.Omega_dm0)/a**3 + IA2.Omega_Lambda0 + IA2.Omega_k0/a**2)
     H2_z = lambda z : H2_a(1/(1+z))
     rho_cr_z = lambda z: 3*H2_z(z)/(8*np.pi*CGS.G)
-    rho_min = rho_cr_z(ia2.get_redshift(snapshots[0]))
+    rho_min = rho_cr_z(IA2.get_redshift(snapshots[0]))
     def get_times():
         from astropy.cosmology import FlatLambdaCDM
         import astropy.units as u
@@ -301,7 +295,7 @@ if __name__=="__main__":
 
         times = []
         for s in snapshots:
-            z = ia2.get_redshift(s)
+            z = IA2.get_redshift(s)
             times.append(cosmo.age(z).value*(1e9*CGS.yr))
         times = np.array(times)
         return times-times.min()
