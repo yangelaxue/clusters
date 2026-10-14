@@ -240,6 +240,8 @@ if __name__=="__main__":
     rho_inp = next(rhovxs_inp)
     vxs_sh = (vx-calc_avgvelocity(rho_inp,vx) for vx in rhovxs_inp)
     rhovxs_sh = (rho_inp if Name=="rho" else next(vxs_sh) for Name in rhovxNames)
+    for i,val in enumerate(rhovxs_sh):
+        print("LOOK HERE",i)
     # Calculate gravitational potentials.
     pot = (calc_gravpot(dens,(dL,)*3,G=G_0) for dens in dens_inp)
 
