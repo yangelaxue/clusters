@@ -294,16 +294,24 @@ if __name__=="__main__":
     # print(dL)
 
     # Save final fields!
+    # Find critical density.
+    H2_a = lambda a : IA2.H_0**2 * (IA2.Omega_r0/a**4 + (IA2.Omega_bm0+IA2.Omega_dm0)/a**3 + IA2.Omega_Lambda0 + IA2.Omega_k0/a**2)
+    H2_z = lambda z : H2_a(1/(1+z))
+    rho_cr_z = lambda z: 3*H2_z(z)/(8*np.pi*CGS.G)
+    rho_cr = rho_cr_z(IA2.get_redshift(snapshots[0]))/rho_0
+    temp = ia2.get_val('Temperature',snapshot=snapshots[0],c=c)
+    prs_cr = rho_cr*rho_0/CGS.me*CGS.kB*(temp[temp>0].max()*1e-4)/p_0
+
     n_points = np.prod(shape_final)
     for varName,val in zip(varNames,vals_final):
         if varName=="prs":
             # print(f"Zero pressures: {(val==0.0).sum()}")
-            val[val<0.001] = val[val>0].min()
+            val[val<prs_cr] = prs_cr
         with open(os.path.join(savePath, f'{varName}0.dbl'),'wb') as f_o:
             f_o.write(struct.pack('<'+'d'*n_points,*(val.T.flatten())))
     for varName,val in zip(rhovxNames,vxs_final):
         if varName=="rho":
-            val[val<0.001] = val[val>0].min()
+            val[val<rho_cr] = rho_cr
         with open(os.path.join(savePath, f'{varName}0.dbl'),'wb') as f_o:
             f_o.write(struct.pack('<'+'d'*n_points,*(val.T.flatten())))
     # Save potentials velocities
@@ -325,11 +333,6 @@ if __name__=="__main__":
                 xR *= L[d]
                 f_o.write("{:d}   {:12.6e}  {:12.6e}\n".format(i+1, xL, xR))
 
-    # Save information.
-    H2_a = lambda a : IA2.H_0**2 * (IA2.Omega_r0/a**4 + (IA2.Omega_bm0+IA2.Omega_dm0)/a**3 + IA2.Omega_Lambda0 + IA2.Omega_k0/a**2)
-    H2_z = lambda z : H2_a(1/(1+z))
-    rho_cr_z = lambda z: 3*H2_z(z)/(8*np.pi*CGS.G)
-    rho_min = rho_cr_z(IA2.get_redshift(snapshots[0]))
     def get_times():
         from astropy.cosmology import FlatLambdaCDM
         import astropy.units as u
@@ -350,8 +353,8 @@ if __name__=="__main__":
         info.write(f"v_0 = {v_0}\n")
         info.write(f"shape = {shape_final}\n")
         info.write("\n")
-        # info.write(f"rho_cr = {rho_min/rho_0}\n")
-        # info.write(f"prs_cr = {prs_min/p_0}\n")
+        info.write(f"rho_cr = {rho_cr}\n")
+        info.write(f"prs_cr = {prs_cr}\n")
         info.write("\n")
         info.write(f"times = {times/t_0}\n")
 
