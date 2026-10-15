@@ -95,10 +95,12 @@ def apodize(val,radius,slope,dL):
 
 def crop_domain(val,shape_cr):
     """ Crop a domain about the grid centre. """
+    if val.shape[0]<=shape_cr[0]:
+        return val
     slices = []
     for sh,sh_cr in zip(val.shape,shape_cr):
         cr = (sh-sh_cr)//2
-        slices.append(slice(cr,sh_cr+cr))
+        slices.append(slice(cr,cr+sh_cr))
     slices = tuple(slices)
     val = val[slices]
     return val[slices]
@@ -173,12 +175,40 @@ def plot(los):
 
         cmap = varkwargs["cmap"]
         im = ax.pcolormesh(val,cmap=cmap,vmin=vmin,vmax=vmax,norm=norm)
-        print(varName,vmin,vmax,norm)
         cbar = Style.get_cbar(im,fig,ax,size=.1)
-        # cbar.ax.set_title()
 
     plt.savefig(os.path.join(savePath,f'cluster_{los}.png'),dpi=300)
-    plt.show()
+    plt.close()
+
+def plot_vals(vals,varNames):
+    """ Just to plot values between processes. """
+    from matplotlib.colors import LogNorm
+    from utils.visualise import Style, get_slice
+    Style.set()
+    
+    for val,varName in zip(vals,varNames):
+        varkwargs = Style.get_varkwargs(varName)
+        fig, ax = plt.subplots(1,1,figsize=(5,4),tight_layout=True)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_title(varkwargs["title"])
+        ax.set_aspect("equal")
+        
+        val = get_slice(val,slc=val.shape[0]//2,los='x',c=1)
+        norm = None
+        vmin, vmax = None, None
+        if varName in {'rho','dm','prs'}: #TODO
+            norm = LogNorm()
+        if varName.startswith('vx') or varName.startswith('Bx'):
+            vmax = np.abs(val).max()
+            vmin = -vmax
+        cmap = varkwargs["cmap"]
+        im = ax.pcolormesh(val,cmap=cmap,vmin=vmin,vmax=vmax,norm=norm)
+        cbar = Style.get_cbar(im,fig,ax)
+
+        plt.savefig(os.path.join(savePath,f'{varName}.png'),dpi=300)
+        plt.close()
+
 
 if __name__=="__main__":
     
@@ -255,7 +285,12 @@ if __name__=="__main__":
     # Interpolate to final dimension
     vals_final = (interpolate(val,shape_final) for val in vals_cr)
     vxs_final = (interpolate(val,shape_final) for val in vxs_cr)
+    # plot_vals(vals_final,varNames)
+    # plot_vals(vxs_final,rhovxNames)
     pot_final = (interpolate(val,shape_final) for val in pot_cr)
+    # print(dL)
+    dL = L_final/shape_final[0]
+    # print(dL)
 
     # Save final fields!
     n_points = np.prod(shape_final)
