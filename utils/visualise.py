@@ -144,19 +144,19 @@ class Style:
         elif varName in {"Bx1","Bx"}:
             kwargs.update({
                 "title" : "$x$-Magnetic Field",
-                "cmap" : "berlin",
+                "cmap" : "BrBG",
                 "symbol" : "$B_x$",
             })
         elif varName in {"Bx2","By"}:
             kwargs.update({
                 "title" : "$y$-Magnetic Field",
-                "cmap" : "berlin",
+                "cmap" : "BrBG",
                 "symbol" : "$B_y$",
             })
         elif varName in {"Bx3","Bz"}:
             kwargs.update({
                 "title" : "$z$-Magnetic Field",
-                "cmap" : "berlin",
+                "cmap" : "BrBG",
                 "symbol" : "$B_z$",
             })
         elif varName in {"b2/2",}:
