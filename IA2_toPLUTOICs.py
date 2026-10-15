@@ -279,6 +279,7 @@ if __name__=="__main__":
     vxs_apd = (apodize(val,apd_radius,apd_slope,dL) for val in rhovxs_sh)
     # Crop all fields
     shape_cr = (int(L_final//dL),)*3
+    L_final = shape_cr[0]*dL
     vals_cr = (crop_domain(val,shape_cr) for val in vals_apd)
     vxs_cr = (crop_domain(val,shape_cr) for val in vxs_apd)
     pot_cr = (crop_domain(val,shape_cr) for val in pot)
@@ -289,7 +290,7 @@ if __name__=="__main__":
     # plot_vals(vxs_final,rhovxNames)
     pot_final = (interpolate(val,shape_final) for val in pot_cr)
     # print(dL)
-    dL = L_final/shape_final[0]
+    dL_final = L_final/shape_final[0]
     # print(dL)
 
     # Save final fields!
@@ -307,7 +308,7 @@ if __name__=="__main__":
             f_o.write(struct.pack('<'+'d'*n_points,*(val.T.flatten())))
     # Save grid.
     DIM = 3
-    L = (shape_cr[0]*dL,)*3
+    L = (L_final,)*3
     with open(os.path.join(savePath, 'grid0.out'),'w') as f_o:
         f_o.write("# GEOMETRY:   CARTESIAN\n")
         for d in range(DIM):
@@ -338,7 +339,7 @@ if __name__=="__main__":
     times = get_times()
     # prs_min = rho_cr/CGS.mp * CGS.kB * 2.75
     with open(os.path.join(savePath,'info.txt'),'w') as info:
-        info.write(f"L = {np.array(L)/L_0}, L/2 = {np.array(L)/L_0/2}\n")
+        info.write(f"L = {np.array(L)}, L/2 = {np.array(L)/2}\n")
         info.write(f"rho_0 = {rho_0}\n")
         info.write(f"L_0 = {L_0}\n")
         info.write(f"v_0 = {v_0}\n")
