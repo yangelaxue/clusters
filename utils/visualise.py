@@ -205,6 +205,62 @@ def get_slice(val,slc=0,los='x',c=1):
     else: NotImplementedError("Dimension of val must be 2 or 3.")
     return ret
 
+def plot_vars(vals,varNames,vmins={},vmaxs={}):
+    """
+    Plots all listed variable values in one image.
+
+    Parameters
+    ----------
+        vals : np.ndarray, iterable
+        varNames : list
+        
+    """
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from matplotlib.colors import LogNorm
+
+
+    nrows = int(np.ceil(len(varNames)/3))
+    fig = plt.figure(figsize=(10,nrows*3),tight_layout=True)
+
+    for i,(val,varName) in enumerate(zip(vals,varNames)):
+        if val.ndim==3:
+            val = val[val.shape[0]//2]
+        
+        varkwargs = Style.get_varkwargs(varName)
+        ax = fig.add_subplot(nrows,3,i+1)
+        ax.set_aspect("equal")
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_title(varkwargs["title"])
+        norm = None
+        try:
+            vmin = vmins[varName]
+        except:
+            vmin = None
+        try:
+            vmax = vmaxs[varName]
+        except:
+            vmax = None
+        if varName in {"rho","dm","prs","Density","Dark_Matter_Density","Pressure","Temperature"}: #TODO
+            norm = LogNorm(vmin=vmin,vmax=vmax)
+            vmin, vmax = None, None
+        if varName.startswith("vx") or varName in {"x-velocity","y-velocity","z-velocity"}:
+            if not vmin:
+                vmax = np.abs(val).max()
+                vmin = -vmax
+        if varName.startswith("Bx") or varName in {"Bx","By","Bz"}:
+            if not vmin:
+                vmax = np.abs(val).max()
+                vmin = -vmax
+
+        cmap = varkwargs["cmap"]
+        im = ax.pcolormesh(val,cmap=cmap,vmin=vmin,vmax=vmax,norm=norm)
+        cbar = Style.get_cbar(im,fig,ax,size=.1)
+
+    return fig
+
+
 #%% Animations!
 
 # def animate_line(y_vals,x_vals,fig,ax,labels=[],savePath='lines.mp4',**_kwargs):
