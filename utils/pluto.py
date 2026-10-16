@@ -99,17 +99,17 @@ class PlutoData:
         print(f"ndim : {self.ndim}")
         print(f"shape : {self.shape}")
         print(f"bbox : {self.bbox}")
-        print(f"_vars : {self._vars}")
+        # print(f"_vars : {self._vars}") #TODO not implemented.
         print(f"EOS : {self.EOS}")
         if self.EOS=="IDEAL":
             print(f"gamma : {self.gamma}")
         print()
-        print(f"rho_0 : {self.rho_0} {CGS.rho_unit}")
-        print(f"L_0 : {self.L_0} {CGS.L_unit}")
-        print(f"v_0 : {self.v_0} {CGS.v_unit}")
-        print(f"t_0 : {self.t_0} {CGS.t_unit}")
-        print(f"p_0 : {self.p_0} {CGS.p_unit}")
-        print(f"B_0 : {self.B_0} {CGS.B_unit}")
+        print(f"rho_0 : {self.rho_0} g")
+        print(f"L_0 : {self.L_0} cm")
+        print(f"v_0 : {self.v_0} cm/s")
+        print(f"t_0 : {self.t_0} s")
+        print(f"p_0 : {self.p_0} cgs")
+        print(f"B_0 : {self.B_0} cgs")
         print()
         print(f"FORCED_TURB : {self.FORCED_TURB}")
         if self.FORCED_TURB=="YES":
@@ -176,6 +176,17 @@ class PlutoData:
         else:
             ValueError(f"snapshots = {snapshots} is not supported.")
         return times
+
+    def get_snapshots(self,):
+        """ Read file names in the path to retrieve list of snapshots. """
+        fNames = []
+        for fName in os.listdir(self.Path):
+            if fName.startswith("data") and fName.endswith("dbl.h5"):
+                fNames.append(fName)
+        snapshots = np.array([int(fName.split(".")[1]) for fName in fNames])
+        idx = np.argsort(snapshots)
+        snapshots = snapshots[idx]
+        return snapshots        
 
     def get_dxdydz(self,units="code"):
         """ Get cell size. """
