@@ -114,7 +114,6 @@ class IA2Data:
             ret = get_val(self.Path,varName,snapshot,**kwargs) * _const
             return ret
         else:
-            assert varName in {"ek","vorticity","B2","curlB"}, f"Derived field {varName} is not recognised."
             if varName=="ek":
                 dens = self.get_val("Density",snapshot,units=units,**kwargs)
                 dens += self.get_val("Dark_Matter_Density",snapshot,units=units,**kwargs)
@@ -128,6 +127,13 @@ class IA2Data:
                 vy = self.get_val("y-velocity",snapshot,units=units,**kwargs)
                 vz = self.get_val("z-velocity",snapshot,units=units,**kwargs)
                 return curl_discrete(vx,vy,vz,dxdydz=(IA2.dL,)*3)
+            elif varName=="vorticity2":
+                from utils.gradient import curl_discrete
+                vx = self.get_val("x-velocity",snapshot,units=units,**kwargs)
+                vy = self.get_val("y-velocity",snapshot,units=units,**kwargs)
+                vz = self.get_val("z-velocity",snapshot,units=units,**kwargs)
+                vor = np.array(curl_discrete(vx,vy,vz,dxdydz=(IA2.dL,)*3))
+                return np.sum(vor**2,axis=0)
             elif varName=="B2":
                 Bx = self.get_val("Bx",snapshot,units=units,**kwargs)
                 By = self.get_val("By",snapshot,units=units,**kwargs)
@@ -139,6 +145,15 @@ class IA2Data:
                 By = self.get_val("By",snapshot,units=units,**kwargs)
                 Bz = self.get_val("Bz",snapshot,units=units,**kwargs)
                 return curl_discrete(Bx,By,Bz,dxdydz=(IA2.dL,)*3)
+            elif varName=="curlB2":
+                from utils.gradient import curl_discrete
+                Bx = self.get_val("Bx",snapshot,units=units,**kwargs)
+                By = self.get_val("By",snapshot,units=units,**kwargs)
+                Bz = self.get_val("Bz",snapshot,units=units,**kwargs)
+                curlB = np.array(curl_discrete(Bx,By,Bz,dxdydz=(IA2.dL,)*3))
+                return np.sum(curlB**2,axis=0)
+            else:
+                print(f"Derived field {varName} is not recognised.")
 
     def gen_vals(self,varName=None,snapshot=None,varNames=None,snapshots=None,units="cgs",**kwargs):
         """

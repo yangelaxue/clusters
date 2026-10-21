@@ -117,11 +117,12 @@ class PlutoData:
             print(f"FORCED_TURB_ENERGY : {self.FORCED_TURB_ENERGY}")
 
     def get_val(self,varName,snapshot,units="code",**kwargs):
-            """
-            Load and return field values of a single field from a specified snapshot.
-            See get_val for details.
-            """
-    
+        """
+        Load and return field values of a single field from a specified snapshot.
+        See get_val for details.
+        """
+
+        if varName in {"rho","prs","vx1","vx2","vx3","Bx1","Bx2","Bx3","pot"}:
             _const = 1.
             if units.lower()=="cgs":
                 if varName=="rho":
@@ -134,27 +135,70 @@ class PlutoData:
                 _const = 1.
             else:
                 raise ValueError(f"Units {units} is not supported.")
-    
             ret = get_val(self.Path,varName,snapshot,**kwargs) * _const
             return ret
+        else:
+            if varName=="ek":
+                dens = self.get_val("rho",snapshot,units=units,**kwargs)
+                vx = self.get_val("vx1",snapshot,units=units,**kwargs)
+                vy = self.get_val("vx2",snapshot,units=units,**kwargs)
+                vz = self.get_val("vx3",snapshot,units=units,**kwargs)
+                return 0.5 * dens * (vx**2 + vy**2 + vz**2)
+            elif varName=="vorticity":
+                from utils.gradient import curl_discrete
+                vx = self.get_val("vx1",snapshot,units=units,**kwargs)
+                vy = self.get_val("vx2",snapshot,units=units,**kwargs)
+                vz = self.get_val("vx3",snapshot,units=units,**kwargs)
+                dxdydz = self.get_dxdydz(units=units)
+                return curl_discrete(vx,vy,vz,dxdydz=dxdydz)
+            elif varName=="vorticity2":
+                from utils.gradient import curl_discrete
+                vx = self.get_val("vx1",snapshot,units=units,**kwargs)
+                vy = self.get_val("vx2",snapshot,units=units,**kwargs)
+                vz = self.get_val("vx3",snapshot,units=units,**kwargs)
+                dxdydz = self.get_dxdydz(units=units)
+                vor = np.array(curl_discrete(vx,vy,vz,dxdydz=dxdydz))
+                return np.sum(vor**2,axis=0)
+            elif varName=="B2":
+                Bx = self.get_val("Bx1",snapshot,units=units,**kwargs)
+                By = self.get_val("Bx2",snapshot,units=units,**kwargs)
+                Bz = self.get_val("Bx3",snapshot,units=units,**kwargs)
+                return Bx**2 + By**2 + Bz**2
+            elif varName=="curlB":
+                from utils.gradient import curl_discrete
+                Bx = self.get_val("Bx1",snapshot,units=units,**kwargs)
+                By = self.get_val("Bx2",snapshot,units=units,**kwargs)
+                Bz = self.get_val("Bx3",snapshot,units=units,**kwargs)
+                dxdydz = self.get_dxdydz(units=units)
+                return curl_discrete(Bx,By,Bz,dxdydz=dxdydz)
+            elif varName=="curlB2":
+                from utils.gradient import curl_discrete
+                Bx = self.get_val("Bx1",snapshot,units=units,**kwargs)
+                By = self.get_val("Bx2",snapshot,units=units,**kwargs)
+                Bz = self.get_val("Bx3",snapshot,units=units,**kwargs)
+                dxdydz = self.get_dxdydz(units=units)
+                curl_B = np.array(curl_discrete(Bx,By,Bz,dxdydz=dxdydz))
+                return np.sum(curl_B**2,axis=0)
+            else:
+                print(f"Derived field {varName} is not recognised.")
 
-    def gen_vals(self,varName=None,snapshot=None,varNames=None,snapshots=None,units="cgs",**kwargs):
-            """
-            Generator for field values.
-                For a single field for many snapshots,
-            or
-                For a many fields for a single snapshot.
-            """
-    
-            assert varNames or snapshots, "Only generate fields for a single snapshot, or snapshots for a single field."
-            
-            if varNames:
-                for varName in varNames:
-                    yield self.get_val(varName,snapshot,units,**kwargs)
-            if snapshots:
-                for s in snapshots:
-                    yield self.get_val(varName,s,units,**kwargs)
-    
+    def gen_vals(self,varName=None,snapshot=None,varNames=None,snapshots=None,units="code",**kwargs):
+        """
+        Generator for field values.
+            For a single field for many snapshots,
+        or
+            For a many fields for a single snapshot.
+        """
+
+        assert varNames or snapshots, "Only generate fields for a single snapshot, or snapshots for a single field."
+        
+        if varNames:
+            for varName in varNames:
+                yield self.get_val(varName,snapshot,units,**kwargs)
+        if snapshots:
+            for s in snapshots:
+                yield self.get_val(varName,s,units,**kwargs)
+
     def get_times(self,snapshots="all",units="code"):
         """ Return time in either code or CGS units. """
 
