@@ -1,81 +1,92 @@
 """
-Script that plots slices, projections of ENZO Itasca IA2 raw fields or derived fields.
+Script that plots central slices of ENZO Itasca IA2 raw fields or derived fields.
+TODO: Does not take into account comoving coodinates.
 
 Author: Angela Xue
 Date: October 2026
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
-from utils.visualise import Style, get_cbar
+def calc_vminsvmaxs(ia2,varNames,snapshots):
 
-from utils.grid import get_xyz
+    vmins, vmaxs = {}, {}
 
-def plot_slice(ia2,varName,snapshot,los):
-
-    centre = ia2.get_centre(snapshot,c=c)
-    r_Delta, M_Delta, c_s, t_s, den_centre = ia2.get_units(Delta)
-
-    val = ia2.get_val(varName,snapshot,units="cgs",c=c)
-    if varName in {"vorticity","curlB"}:
-        val = np.sum([_val**2 for _val in val])
-    if "Density" in varName:
-        val /= den_centre
-    elif varName in {"x-velocity","y-velocity","z-velocity"}:
-        val /= c_s
-    elif varName in {"Bx","By","Bz"}:
-        pass
-    xyz = get_xyz(val.shape,centre)
-    if los in {0,"x","X"}:
-        val = val[centre[0]]
-        x, y = xyz[1], xyz[2]
-    elif los in {1,"y","Y"}:
-        val = val[:,centre[1]]
-        x, y = xyz[2], xyz[1]
-    elif los in {1,"z","Z"}:
-        val = val[:,:,centre[2]]
-        x, y = xyz[0], xyz[1]
-    else:
-        raise ValueError("Line-of-sight must be 0, x, X, 1, y, Y, 2, z, Z.")
-    
-    dL = IA2.dL * c / (1+IA2.get_redshift(snapshot)) / r_Delta
-    x, y = x*dL, y*dL
-    
-    varkwargs = Style.get_varkwargs(varName)
-    
-    fig, ax = plt.subplots(figsize=(5,5),**Style.figkwargs)
-    ax.set_aspect("equal")
-    ax.set_xlabel("$x$ $(R_{})$".format("{"+str(Delta)+"}"))
-    ax.set_ylabel("$y$ $(R_{})$".format("{"+str(Delta)+"}"))
-    im = ax.pcolormesh(x,y,val,cmap=varkwargs["cmap"])
-    cbar = get_cbar(im,fig,ax)
-    cbar.ax.set_title(r"$\rho$ $(\rho_{\rm c})$",loc='left')
-    plt.show()
-
-def plot_projection(ia2,varName,snapshot):
-    pass
-
+    for varName in varNames:
+        if varName in {"x-velocity","y-velocity","z-velocity","Bx","By","Bz"}:
+            vals = ia2.gen_vals(varName=varName,snapshots=snapshots,units=units,c=c)
+            val_max = 0.
+            for val in vals:
+                val_max = max(val_max,np.abs(val).max())
+            val_min = -val_max
+        else:
+            vals = ia2.gen_vals(varName=varName,snapshots=snapshots,units=units,c=c)
+            val_max = 0.
+            val_min = 0.
+            for val in vals:
+                val_max = max(val_max,val.max())
+                val_min = min(val_min,val.min())
+        vmins[varName] = val_min
+        vmaxs[varName] = val_max
+    return vmins, vmaxs
 
 if __name__=="__main__":
-
-    from utils.ia2 import IA2, IA2Data
 
     # Parse arguments
     import argparse
     parser = argparse.ArgumentParser("main")
     parser.add_argument("cluster", help="Which ENZO Itasca IA2 cluster to save the properties for.", type=str)
+    parser.add_argument("-DEBUG", help="Switch to debug mode.",type=bool)
+    parser.add_argument("-c",type=int)
     args = parser.parse_args()
     cluster = args.cluster
+    DEBUG = args.DEBUG
 
     c = 1
     Delta = 200
-    if 1: # DEBUG
-        c = 40
+
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import os
+
+    from utils.ia2 import IA2, IA2Data
+    from utils.visualise import Style, plot_vars, get_slice
+    Style.set()
 
     ia2 = IA2Data(cluster)
-    plot_slice(ia2,"Density",15,los="x")
-    # for s in ia2.snapshots:
-    #     for varName in IA2.fields:
-    #         plot_slice(ia2,varName,s)
-    #     for varName in {"ek","vorticity","B2","curlB"}:
-    #         plot_slice(ia2,varName,s)
+    c = 1
+    snapshots = IA2.snapshots[ia2.cluster]
+    if DEBUG:
+        c = args.c if args.c else 40
+        snapshots = [10,11]
+    if not os.path.exists(os.path.join(ia2.Path,"images")):
+        os.mkdir(os.path.join(ia2.Path,"images"))
+
+    # snapshots = ia2.snapshots
+    units = "cgs"
+    redshifts = [IA2.get_redshift(s) for s in snapshots]
+    centres = [ia2.get_centre(s,c=c) for s in snapshots]
+    loss = [0,1,2]
+
+    varNames = ["Bx","By","Bz","x-velocity","y-velocity","z-velocity","Density","Dark_Matter_Density","Temperature"]
+    vmins, vmaxs = calc_vminsvmaxs(ia2,varNames,snapshots)
+    vmins["Density"] = None
+    vmins["Dark_Matter_Density"] = None
+    vmins["Temperature"] = None
+    for los in loss:
+        for i,s in enumerate(snapshots):
+            vals = ia2.gen_vals(varNames=varNames,snapshot=s,units=units,c=c)
+            vals = [get_slice(val,slc=centres[i][los],los=los) for val in vals]
+            fig = plot_vars(vals,varNames,vmins=vmins,vmaxs=vmaxs)
+            fig.suptitle(f"z={redshifts[i]}")
+            plt.savefig(os.path.join(ia2.Path,"images",f"fields{los}_{s}.png"),dpi=Style.figkwargs["dpi"])
+            plt.close()
+
+    derived_varNames = ["ek","vorticity2","B2","curlB2"]
+    vmins, vmaxs = calc_vminsvmaxs(ia2,derived_varNames,snapshots)
+    for los in loss:
+        for i,s in enumerate(snapshots):
+            vals = ia2.gen_vals(varNames=derived_varNames,snapshot=s,units=units,c=c)
+            vals = [get_slice(val,slc=centres[i][los],los=los) for val in vals]
+            fig = plot_vars(vals,derived_varNames,vmins=vmins,vmaxs=vmaxs)
+            fig.suptitle(f"z={redshifts[i]}")
+            plt.savefig(os.path.join(ia2.Path,"images",f"derivedfields{los}_{s}.png"),dpi=Style.figkwargs["dpi"])
+            plt.close()
