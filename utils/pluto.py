@@ -127,6 +127,10 @@ class PlutoData:
             if units.lower()=="cgs":
                 if varName=="rho":
                     _const *= self.rho_0
+                elif varName=="prs":
+                    _const *= self.p_0
+                elif varName=="pot":
+                    _const *= self.p_0*self.L_0**3
                 elif "vx" in varName:
                     _const *= self.v_0
                 elif "Bx" in varName:
