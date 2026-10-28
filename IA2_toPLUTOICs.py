@@ -277,8 +277,12 @@ if __name__=="__main__":
     pot = (calc_gravpot(dens,(dL,)*3,G=G_0) for dens in dens_inp)
 
     # Apodize all fields
-    vals_apd = (apodize(val,apd_radius,apd_slope,dL) for val in vals_inp)
-    vxs_apd = (apodize(val,apd_radius,apd_slope,dL) for val in rhovxs_sh)
+    if apd_radius<0:
+        vals_apd = vals_inp
+        vxs_apd = rhovxs_sh
+    else:
+        vals_apd = (apodize(val,apd_radius,apd_slope,dL) for val in vals_inp)
+        vxs_apd = (apodize(val,apd_radius,apd_slope,dL) for val in rhovxs_sh)
     # Crop all fields
     shape_cr = (int(L_final//dL),)*3
     L_final = shape_cr[0]*dL
