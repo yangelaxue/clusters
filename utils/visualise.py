@@ -34,13 +34,17 @@ Revised: October 2026
 class Style:
 
     figkwargs = {
+        "figsize" : (5,4),
         "dpi" : 300,
         "tight_layout" : True,
+        "xticks" : None,
+        "yticks" : None,
     }
 
     def set():
         import socket
         import matplotlib as mpl
+        import matplotlib.pyplot as plt
 
         fontsize = 10
         if socket.gethostname()=='yange':
@@ -49,7 +53,7 @@ class Style:
         mpl.rc('axes', **{'titlesize': fontsize})
         mpl.rc('font', **{'size': fontsize})
 
-        mpl.pyplot.rcParams['axes.axisbelow'] = True
+        plt.rcParams['axes.axisbelow'] = True
         mpl.rcParams['lines.linewidth'] = 1
 
         mpl.rcParams['axes.prop_cycle'] = mpl.cycler(
@@ -205,7 +209,55 @@ def get_slice(val,slc=0,los='x',c=1):
     else: NotImplementedError("Dimension of val must be 2 or 3.")
     return ret
 
-def plot_vars(vals,varNames,vmins={},vmaxs={}):
+def plot_var(val,varName,**kwargs):
+    """
+    Plot a field.
+    """
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from matplotlib.colors import LogNorm
+
+    _kwargs = {
+        "vmin" : None,
+        "vmax" : None,
+        "xticks" : None,
+        "yticks" : None,
+    }
+    kwargs = Style.figkwargs | _kwargs | kwargs
+    vmin, vmax = kwargs["vmin"], kwargs["vmax"]
+    varkwargs = Style.get_varkwargs(varName)
+
+    if val.ndim==3:
+        val = val[val.shape[0]//2]
+
+    norm = None
+    if varName in {"rho","dm","prs","Density","Dark_Matter_Density","Pressure","Temperature"}: #TODO
+        norm = LogNorm(vmin=vmin,vmax=vmax)
+        vmin, vmax = None, None
+    if varName.startswith("vx") or varName in {"x-velocity","y-velocity","z-velocity"}:
+        if not vmin:
+            vmax = np.abs(val).max()
+            vmin = -vmax
+    if varName.startswith("Bx") or varName in {"Bx","By","Bz"}:
+        if not vmin:
+            vmax = np.abs(val).max()
+            vmin = -vmax
+
+    fig, ax = plt.subplots(1,1,figsize=kwargs["figsize"],tight_layout=kwargs["tight_layout"])
+    ax.set_aspect("equal")
+    if kwargs["xticks"]!=None:
+        ax.set_xticks(kwargs["xticks"])
+    if kwargs["yticks"]!=None:
+        ax.set_yticks(kwargs["yticks"])
+    ax.set_title(varkwargs["title"])
+
+    cmap = varkwargs["cmap"]
+    im = ax.pcolormesh(val,cmap=cmap,vmin=vmin,vmax=vmax,norm=norm)
+    cbar = Style.get_cbar(im,fig,ax,size=.1)
+
+    return fig
+
+def plot_vars(vals,varNames,**kwargs):
     """
     Plots all listed variable values in one image.
 
@@ -219,6 +271,14 @@ def plot_vars(vals,varNames,vmins={},vmaxs={}):
     import matplotlib.pyplot as plt
     from matplotlib.colors import LogNorm
 
+    _kwargs = {
+        "vmins" : {},
+        "vmaxs" : {},
+        "xticks" : None,
+        "yticks" : None,
+    }
+    kwargs = Style.figkwargs | _kwargs | kwargs
+    vmins, vmaxs = kwargs["vmins"], kwargs["vmaxs"]
 
     nrows = int(np.ceil(len(varNames)/3))
     fig = plt.figure(figsize=(10,nrows*3),tight_layout=True)
@@ -230,8 +290,10 @@ def plot_vars(vals,varNames,vmins={},vmaxs={}):
         varkwargs = Style.get_varkwargs(varName)
         ax = fig.add_subplot(nrows,3,i+1)
         ax.set_aspect("equal")
-        ax.set_xticks([])
-        ax.set_yticks([])
+        if kwargs["xticks"]!=None:
+            ax.set_xticks(kwargs["xticks"])
+        if kwargs["yticks"]!=None:
+            ax.set_yticks(kwargs["yticks"])
         ax.set_title(varkwargs["title"])
         norm = None
         try:
