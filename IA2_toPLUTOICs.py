@@ -44,15 +44,17 @@ def read_topluto(Path):
 
 def define_units(ia2,Delta):
     """ Define code units to use in PLUTO. These are cluster units. """
-    r_Delta, M_Delta, c_s, t_s, den_centre = ia2.get_units(Delta)
+    # r_Delta, M_Delta, c_s, t_s, den_centre
 
     global L_0, v_0, rho_0
     global t_0, B_0, p_0
     global K_0, G_0
 
-    L_0 = r_Delta
-    v_0 = c_s
-    rho_0 = den_centre
+    rho_0, L_0, v_0, t_0, p_0, B_0 = ia2.get_units(Delta)
+
+    # L_0 = r_Delta
+    # v_0 = c_s
+    # rho_0 = den_centre
     
     t_0 = L_0/v_0 # time unit in seconds
     B_0 = v_0 * (4*np.pi*rho_0)**.5 # Magnetic field unit in Gauss (G)

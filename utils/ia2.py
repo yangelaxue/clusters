@@ -99,16 +99,18 @@ class IA2Data:
                     _const *= IA2.cb*(1+z)**2
             elif units.lower().startswith("delta"):
                 Delta = int(units.lower().removeprefix("delta"))
+                rho_0, L_0, v_0, t_0, p_0, B_0 = self.get_units(Delta)
                 if "Density" in varName:
                     _const *= IA2.cd*(1+z)**3
-                    _const /= self.get_units(Delta)[4]
+                    _const /= rho_0
                 elif varName in {"x-velocity","y-velocity","z-velocity"}:
                     _const *= IA2.cv
-                    _const /= self.get_units(Delta)[2]
+                    _const /= v_0
                 elif varName in {"Bx","By","Bz"}:
                     _const *= IA2.cb*(1+z)**2
+                    _const /= B_0
             elif units.lower()=="code":
-                _const = 1
+                _const = 1.
             else:
                 raise ValueError(f"Units {units} is not supported.")
             ret = get_val(self.Path,varName,snapshot,**kwargs) * _const
@@ -206,9 +208,13 @@ class IA2Data:
                     continue
                 if int(s)==15:
                     density = float(density)
-                    return r_Delta, M_Delta, c_s, t_s, density
-        print(f"Could not locate cluster parameters or centre density.")
-        return None
+                    # return r_Delta, M_Delta, c_s, t_s, density
+                    break
+        rho_0, L_0, v_0 = density, r_Delta, c_s
+        t_0 = L_0/v_0
+        p_0 = rho_0*v_0**2
+        B_0 = v_0*(4*np.pi*rho_0)**.5
+        return rho_0, L_0, v_0, t_0, p_0, B_0
 
     def get_fnames(self):
         """
