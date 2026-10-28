@@ -272,3 +272,88 @@ def curl_discrete(vx,vy,vz=None,dxdydz=None):
     except:
         curlz = dvydx-dvxdy
         return curlz
+
+def gradient_radial(field,centre=(),**kwargs):
+    """
+    Calculate the radial gradient of a field.
+        This function assumes periodic boundary conditions and even spacing.
+        Works for 2 or 3 dimensions.
+    
+    See gradient_discrete for more details on the parameters and return values.
+    """
+
+    if not centre:
+        centre = tuple(sh//2 for sh in field.shape)
+
+    # Calculate the gradient in Cartesian coordinates.
+    grad_cartesian = gradient_discrete(field,**kwargs)
+
+    # Calculate the radial gradient.
+    XYZ = np.meshgrid(*[np.arange(-cen,sh-cen) for sh,cen in zip(field.shape,centre)], indexing='ij')
+    R = np.sqrt(np.sum(np.array(XYZ)**2,axis=0))
+    
+    Phi = np.zeros_like(R)
+    # Avoid division by 0
+    where = np.where((XYZ[0]!=0)*(XYZ[1]!=0))
+    Phi[where] = np.arctan2(XYZ[1][where],XYZ[0][where])
+    where = np.where((XYZ[0]==0)*(XYZ[1]!=0))
+    Phi[where] = np.pi/2 * XYZ[1][where]/np.abs(XYZ[1][where])
+    where = np.where((XYZ[0]>0)*(XYZ[1]==0))
+    Phi[where] = 0
+    where = np.where((XYZ[0]<0)*(XYZ[1]==0))
+    Phi[where] = np.pi
+    if field.ndim==3:
+        Theta = np.zeros_like(R)
+        # Avoid division by 0
+        where = np.where((R!=0)*(XYZ[2]!=0))
+        Theta[where] = np.arccos(XYZ[2][where]/R[where])
+        Theta[R==0] = 0
+        Theta[XYZ[2]==0] = np.pi/2
+        grad_r = (grad_cartesian[0]*np.sin(Theta)*np.cos(Phi) + grad_cartesian[1]*np.sin(Theta)*np.sin(Phi) + grad_cartesian[2]*np.cos(Theta))
+    else:
+        grad_r = (grad_cartesian[0]*np.cos(Phi) + grad_cartesian[1]*np.sin(Phi))
+    
+    return grad_r
+
+# def gradient_spherical(field,dxdydz=None,centre=(),stencil:int=3):
+#     """
+#     Calculate the radial gradient of a field in spherical coordinates
+#         by converting it from Cartesian coordinates.
+#         This function assumes periodic boundary conditions and even spacing.
+#         Only works for 3 dimensions.
+    
+#     See gradient_discrete for more details on the parameters and return values.
+#     """
+    
+#     # If dxdydz is not provided, set to tuple of ones.
+#     try:
+#         assert len(dxdydz)==field.ndim
+#     except:
+#         dxdydz = (1,)*field.ndim
+#     if not centre:
+#         centre = tuple(sh//2 for sh in field.shape)
+
+#     # Calculate the gradient in Cartesian coordinates.
+#     grad_x, grad_y, grad_z = gradient_discrete(field,dxdydz=dxdydz,stencil=stencil)
+
+#     # Convert the gradient to spherical coordinates.
+#     X, Y, Z = np.meshgrid(*[np.arange(-cen,cen) for cen in centre], indexing='ij')
+#     R = np.sqrt(X**2 + Y**2 + Z**2)
+#     Theta = np.zeros_like(R)
+#     where = np.where((R!=0)*(Z!=0))
+#     Theta[where] = np.arccos(Z[where]/R[where])
+#     Theta[R==0] = 0 # Avoid division by 0
+#     Theta[Z==0] = np.pi/2
+#     Phi = np.zeros_like(R)
+#     where = np.where((X!=0)*(Y!=0))
+#     Phi[where] = np.arctan2(Y[where],X[where])
+#     where = np.where((X==0)*(Y!=0))
+#     Phi[where] = np.pi/2 * Y[where]/np.abs(Y[where]) # Avoid division by 0
+#     Phi[Y==0] = 0
+
+#     grad_r = (grad_x*np.sin(Theta)*np.cos(Phi) + grad_y*np.sin(Theta)*np.sin(Phi) + grad_z*np.cos(Theta))
+#     # grad_theta = (grad_x*X*Z + grad_y*Y*Z - grad_z*(X**2+Y**2)) / (R*np.sqrt(X**2+Y**2))
+#     # grad_phi = (-grad_x*Y + grad_y*X) / (X**2+Y**2)
+
+#     return grad_r#, grad_theta, grad_phi
+
