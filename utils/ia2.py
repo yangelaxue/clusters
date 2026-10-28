@@ -123,13 +123,23 @@ class IA2Data:
                 vy = self.get_val("y-velocity",snapshot,units=units,**kwargs)
                 vz = self.get_val("z-velocity",snapshot,units=units,**kwargs)
                 return 0.5 * dens * (vx**2 + vy**2 + vz**2)
+            elif varName in {"Pressure","prs"}:
+                mu = kwargs["mu"]
+                kwargs.pop("mu")
+                rho = self.get_val("Density",snapshot,units=units,**kwargs)
+                temp = self.get_val("Temperature",snapshot,units=units,**kwargs)
+                return rho/(CGS.mp*mu) * CGS.kB*temp
             elif varName=="vorticity":
+                print(f"{varName} is only returned in CGS units.")
+                units = "cgs"
                 from utils.gradient import curl_discrete
                 vx = self.get_val("x-velocity",snapshot,units=units,**kwargs)
                 vy = self.get_val("y-velocity",snapshot,units=units,**kwargs)
                 vz = self.get_val("z-velocity",snapshot,units=units,**kwargs)
                 return curl_discrete(vx,vy,vz,dxdydz=(IA2.dL,)*3)
             elif varName=="vorticity2":
+                print(f"{varName} is only returned in CGS units.")
+                units = "cgs"
                 from utils.gradient import curl_discrete
                 vx = self.get_val("x-velocity",snapshot,units=units,**kwargs)
                 vy = self.get_val("y-velocity",snapshot,units=units,**kwargs)
@@ -142,12 +152,16 @@ class IA2Data:
                 Bz = self.get_val("Bz",snapshot,units=units,**kwargs)
                 return Bx**2 + By**2 + Bz**2
             elif varName=="curlB":
+                print(f"{varName} is only returned in CGS units.")
+                units = "cgs"
                 from utils.gradient import curl_discrete
                 Bx = self.get_val("Bx",snapshot,units=units,**kwargs)
                 By = self.get_val("By",snapshot,units=units,**kwargs)
                 Bz = self.get_val("Bz",snapshot,units=units,**kwargs)
                 return curl_discrete(Bx,By,Bz,dxdydz=(IA2.dL,)*3)
             elif varName=="curlB2":
+                print(f"{varName} is only returned in CGS units.")
+                units = "cgs"
                 from utils.gradient import curl_discrete
                 Bx = self.get_val("Bx",snapshot,units=units,**kwargs)
                 By = self.get_val("By",snapshot,units=units,**kwargs)
