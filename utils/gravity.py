@@ -29,7 +29,7 @@ def calc_gravpot(rho,dxdydz=None,G=1.):
         Gravitational potential field in natural units.
     """
     
-    potential = invlapl_FT(rho, dxdydz)
+    potential = invlapl_FT(rho,dxdydz)
     potential *= 4*pi*G
     
     return potential
