@@ -276,9 +276,12 @@ def plot_vars(vals,varNames,**kwargs):
         "vmaxs" : {},
         "xticks" : None,
         "yticks" : None,
+        "x" : None,
+        "y" : None,
     }
     kwargs = Style.figkwargs | _kwargs | kwargs
     vmins, vmaxs = kwargs["vmins"], kwargs["vmaxs"]
+    x, y = kwargs["x"], kwargs["y"]
 
     nrows = int(np.ceil(len(varNames)/3))
     fig = plt.figure(figsize=(10,nrows*3),tight_layout=True)
@@ -317,7 +320,7 @@ def plot_vars(vals,varNames,**kwargs):
                 vmin = -vmax
 
         cmap = varkwargs["cmap"]
-        im = ax.pcolormesh(val,cmap=cmap,vmin=vmin,vmax=vmax,norm=norm)
+        im = ax.pcolormesh(x,y,val,cmap=cmap,vmin=vmin,vmax=vmax,norm=norm)
         cbar = Style.get_cbar(im,fig,ax,size=.1)
 
     return fig
