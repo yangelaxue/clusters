@@ -295,23 +295,21 @@ if __name__=="__main__":
     # plot_vals(vals_final,varNames)
     # plot_vals(vxs_final,rhovxNames)
     pot_final = (interpolate(val,shape_final) for val in pot_cr)
-    # print(dL)
     dL_final = L_final/shape_final[0]
-    # print(dL)
 
     # Save final fields!
     # Find critical density.
     H2_a = lambda a : IA2.H_0**2 * (IA2.Omega_r0/a**4 + (IA2.Omega_bm0+IA2.Omega_dm0)/a**3 + IA2.Omega_Lambda0 + IA2.Omega_k0/a**2)
     H2_z = lambda z : H2_a(1/(1+z))
     rho_cr_z = lambda z: 3*H2_z(z)/(8*np.pi*CGS.G)
-    rho_cr = rho_cr_z(IA2.get_redshift(snapshots[0]))/rho_0
     temp = ia2.get_val('Temperature',snapshot=snapshots[0],c=c)
+    rho_cr = rho_cr_z(IA2.get_redshift(snapshots[0]))/rho_0 / 2
     prs_cr = rho_cr*rho_0/CGS.me*CGS.kB*(temp[temp>0].max()*1e-4)/p_0
+    # rho_cr, prs_cr = 0., 0.
 
     n_points = np.prod(shape_final)
     for varName,val in zip(varNames,vals_final):
         if varName=="prs":
-            # print(f"Zero pressures: {(val==0.0).sum()}")
             val[val<prs_cr] = prs_cr
         with open(os.path.join(savePath, f'{varName}0.dbl'),'wb') as f_o:
             f_o.write(struct.pack('<'+'d'*n_points,*(val.T.flatten())))
