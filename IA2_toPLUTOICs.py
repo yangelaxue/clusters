@@ -11,11 +11,17 @@ from utils.units import CGS
 
 def read_topluto(Path):
     """ Reads the topluto.info file to determine parameters used to convert raw data to PLUTO ICs. """
-    global c, Delta, mu, apd_radius, apd_slope, L_final, shape_final
-    c, Delta, mu, apd_radius, apd_slope, L_final, shape_final = 40, 200, 0.5, 0.5, 16., 3.0, (64,64,64)
+    global cluster, snapshots, c, Delta, mu, apd_radius, apd_slope, L_final, shape_final
+    cluster, snapshots, c, Delta, mu, apd_radius, apd_slope, L_final, shape_final = "E14", "10,11", 40, 200, 0.5, 0.5, 16., 3.0, (64,64,64)
     with open(os.path.join(Path,'topluto.info'),'r') as info:
         for line in info.readlines():
             line = line.split('#')[0].replace(" ","").replace("\n","").replace("\t","")
+            if line.startswith('cluster'):
+                cluster = line.split('=')[-1]
+                continue
+            if line.startswith('snapshots'):
+                snapshots = [int(s) for s in line.split("=")[-1].removeprefix('[').removesuffix(']').split(',')]
+                continue
             if line.startswith('c'):
                 c = int(line.split('=')[-1])
                 continue
@@ -223,12 +229,11 @@ if __name__=="__main__":
     # Parse arguments
     import argparse
     parser = argparse.ArgumentParser("main")
-    parser.add_argument("cluster", help="Which IA2 cluster to process.",type=str)
-    parser.add_argument("snapshots", help="Which snapshots to animate.")
+    # parser.add_argument("cluster", help="Which IA2 cluster to process.",type=str)
+    # parser.add_argument("snapshots", help="Which snapshots to animate.")
     parser.add_argument("savePath", help="Where to save ICs.",type=str)
     args = parser.parse_args()
-    cluster = args.cluster
-    snapshots = [int(s) for s in args.snapshots.removeprefix('[').removesuffix(']').split(',')]
+    # cluster = args.cluster
     savePath = args.savePath
 
     # Load interpolation arguments from topluto.info
