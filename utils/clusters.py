@@ -17,11 +17,8 @@ import numpy as np
 
 def calc_centreofmass(dens,XYZ=None,):
     """ Calculate the centre of mass position of a cluster. """
-    if not XYZ:
-        xyz = tuple(np.arange(0,sh) for sh in dens.shape)
-        XYZ = np.meshgrid(*xyz,indexing='ij')
-    centre = np.sum(dens*np.array(XYZ),axis=(1,2,3))/np.sum(dens)
-    return centre
+    from scipy.ndimage import center_of_mass
+    return center_of_mass(dens)
 
 def calc_avgvelocity(dens,vx,vy=None,vz=None):
     """
