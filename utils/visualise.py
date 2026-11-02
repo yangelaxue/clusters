@@ -97,7 +97,7 @@ class Style:
                 # "cmap" : "plasma", #TODO
                 "symbol" : r"$\rho_{\rm DM}$",
             })
-        elif varName in {"prs"}:
+        elif varName in {"prs","Pressure"}:
             kwargs.update({
                 "title" : "Pressure",
                 "cmap" : "Spectral_r",
@@ -222,10 +222,20 @@ def plot_var(val,varName,**kwargs):
         "vmax" : None,
         "xticks" : None,
         "yticks" : None,
+        "x" : None,
+        "y" : None,
     }
+    if not ("x" in kwargs and "y" in kwargs):
+        _kwargs["xticks"] = []
+        _kwargs["yticks"] = []
     kwargs = Style.figkwargs | _kwargs | kwargs
     vmin, vmax = kwargs["vmin"], kwargs["vmax"]
-    varkwargs = Style.get_varkwargs(varName)
+    x, y = kwargs["x"], kwargs["y"]
+    varkwargs = Style.get_varkwargs(varName) | kwargs
+    if type(kwargs["xticks"])==np.ndarray:
+        kwargs["xticks"] = kwargs["xticks"].tolist()
+    if type(kwargs["yticks"])==np.ndarray:
+        kwargs["yticks"] = kwargs["yticks"].tolist()
 
     if val.ndim==3:
         val = val[val.shape[0]//2]
@@ -252,7 +262,10 @@ def plot_var(val,varName,**kwargs):
     ax.set_title(varkwargs["title"])
 
     cmap = varkwargs["cmap"]
-    im = ax.pcolormesh(val,cmap=cmap,vmin=vmin,vmax=vmax,norm=norm)
+    if kwargs["xticks"]==[]:
+        im = ax.pcolormesh(val,cmap=cmap,vmin=vmin,vmax=vmax,norm=norm)
+    else:
+        im = ax.pcolormesh(x,y,val,cmap=cmap,vmin=vmin,vmax=vmax,norm=norm)
     cbar = Style.get_cbar(im,fig,ax,size=.1)
 
     return fig
@@ -279,9 +292,17 @@ def plot_vars(vals,varNames,**kwargs):
         "x" : None,
         "y" : None,
     }
+    if not ("x" in kwargs and "y" in kwargs):
+        _kwargs["xticks"] = []
+        _kwargs["yticks"] = []
+
     kwargs = Style.figkwargs | _kwargs | kwargs
     vmins, vmaxs = kwargs["vmins"], kwargs["vmaxs"]
     x, y = kwargs["x"], kwargs["y"]
+    if type(kwargs["xticks"])==np.ndarray:
+        kwargs["xticks"] = kwargs["xticks"].tolist()
+    if type(kwargs["yticks"])==np.ndarray:
+        kwargs["yticks"] = kwargs["yticks"].tolist()
 
     nrows = int(np.ceil(len(varNames)/3))
     fig = plt.figure(figsize=(10,nrows*3),tight_layout=True)
@@ -320,7 +341,10 @@ def plot_vars(vals,varNames,**kwargs):
                 vmin = -vmax
 
         cmap = varkwargs["cmap"]
-        im = ax.pcolormesh(x,y,val,cmap=cmap,vmin=vmin,vmax=vmax,norm=norm)
+        if not kwargs["xticks"]:
+            im = ax.pcolormesh(val,cmap=cmap,vmin=vmin,vmax=vmax,norm=norm)
+        else:
+            im = ax.pcolormesh(x,y,val,cmap=cmap,vmin=vmin,vmax=vmax,norm=norm)
         cbar = Style.get_cbar(im,fig,ax,size=.1)
 
     return fig
