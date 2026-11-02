@@ -233,7 +233,7 @@ class PlutoData:
                 fNames.append(fName)
         snapshots = np.array([int(fName.split(".")[1]) for fName in fNames])
         idx = np.argsort(snapshots)
-        snapshots = snapshots[idx]
+        snapshots = snapshots[idx].tolist()
         return snapshots        
 
     def get_dxdydz(self,units="code"):

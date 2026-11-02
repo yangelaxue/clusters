@@ -49,7 +49,7 @@ if __name__=="__main__":
         os.mkdir(os.path.join(Path,"images"))
 
     pd = PlutoData(Path)
-    snapshots = pd.get_snapshots().tolist()
+    snapshots = pd.get_snapshots()
     times = pd.get_times(snapshots)
 
     dL, = pd.get_dxdydz()[0]
