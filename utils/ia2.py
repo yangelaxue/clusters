@@ -86,7 +86,9 @@ class IA2Data:
 
         Default to CGS units.
         """
-
+        if "mu" in kwargs:
+            mu = kwargs["mu"]
+            kwargs.pop("mu")
         if varName in IA2.fields:
             z = IA2.get_redshift(snapshot)
             _const = 1.
@@ -124,11 +126,16 @@ class IA2Data:
                 vz = self.get_val("z-velocity",snapshot,units=units,**kwargs)
                 return 0.5 * dens * (vx**2 + vy**2 + vz**2)
             elif varName in {"Pressure","prs"}:
-                mu = kwargs["mu"]
-                kwargs.pop("mu")
-                rho = self.get_val("Density",snapshot,units=units,**kwargs)
-                temp = self.get_val("Temperature",snapshot,units=units,**kwargs)
-                return rho/(CGS.mp*mu) * CGS.kB*temp
+                if units=="cgs":
+                    rho = self.get_val("Density",snapshot,units="cgs",**kwargs)
+                    temp = self.get_val("Temperature",snapshot,units="cgs",**kwargs)
+                    return rho/(CGS.mp*mu) * CGS.kB*temp
+                elif units.lower().startswith("delta"):
+                    Delta = int(units.lower().removeprefix("delta"))
+                    rho_0, L_0, v_0, t_0, p_0, B_0 = self.get_units(Delta)
+                    rho = self.get_val("Density",snapshot,units="cgs",**kwargs)
+                    temp = self.get_val("Temperature",snapshot,units="cgs",**kwargs)
+                    return rho/(CGS.mp*mu) * CGS.kB*temp / p_0
             elif varName=="vorticity":
                 print(f"{varName} is only returned in CGS units.")
                 units = "cgs"
