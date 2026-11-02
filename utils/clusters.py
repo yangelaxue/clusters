@@ -27,6 +27,34 @@ def get_M_r(dens,centre,dxdydz:float=None):
     r_arr = np.arange(dr,R.max(),dr)
     M_arr = np.array([np.sum(dens[R<_r]) for _r in r_arr]) * dV # Mass in a Mpc volume
     return RegularGridInterpolator(r_arr[np.newaxis],M_arr)
+
+def NFW_profile(r,n_0,r_s):
+    """ Navarro-Frenk-White profile. """
+    ret = np.zeros_like(r)
+    zeros = np.where(r==0)
+    non_zeros = np.where(r!=0)
+    ret[zeros] = n_0
+    ret[non_zeros] = n_0 / (r[non_zeros]/r_s) / (1+r[non_zeros]/r_s)**2
+    return ret
+
+def gNFW_profile(r,n_0,r_500,c_500,alpha,beta,gamma):
+    """ generalised Navarro-Frenk-White profile. """
+    r_s = r_500/c_500
+    x = r/r_s
+    ret = np.zeros_like(r)
+    zeros = np.where(r==0)
+    non_zeros = np.where(r!=0)
+    ret[zeros] = n_0
+    ret[non_zeros] = n_0 / (c_500*x[non_zeros])**(gamma) / (1+(c_500*x[non_zeros])**alpha)**((beta-gamma)/alpha)
+    return ret
+
+def beta_profile(r,n_0,r_c,beta):
+    """ beta-profile of a cluster. """
+    return n_0 * (1+(r/r_c)**2)**(-3*beta/2)
+
+def einasto_profile(r,n_2,r_2,alpha):
+    """ Einasto profile. """
+    return n_2 * np.exp(-2/alpha * ((r/r_2)**alpha-1))
     
 def calc_centreofmass(dens):
     """ Calculate the centre of mass position of a cluster. """
