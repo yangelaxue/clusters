@@ -17,7 +17,7 @@ def read_topluto(Path):
     global cluster, snapshots, c, Delta, mu, apd_radius, apd_slope, L_final, shape_final
     cluster, snapshots, c, Delta, mu, apd_radius, apd_slope, L_final, shape_final = \
         "E14", "10,11", 40, 200, 0.5, 0.5, 16., 3.0, (64,64,64)
-    with open(os.path.join(Path,"topluto.info"),"r") as info:
+    with open(os.path.join(Path,"topluto.in"),"r") as info:
         for line in info.readlines():
             line = line.split("#")[0].replace(" ","").replace("\n","").replace("\t","")
             if line.startswith("cluster"):
@@ -221,9 +221,9 @@ def get_times():
     times = np.array(times)
     return times-times.min()
 
-def save_infotxt():
+def save_topluto():
     times = get_times()
-    with open(os.path.join(savePath,"info.txt"),"w") as info:
+    with open(os.path.join(savePath,"topluto.out"),"w") as info:
         info.write(f"L = {L_final}, L/2 = {L_final/2}\n")
         info.write(f"rho_0 = {rho_0}\n")
         info.write(f"L_0 = {L_0}\n")
@@ -323,7 +323,7 @@ if __name__=="__main__":
     # Save grid.
     save_grid0()
     # Save info.
-    save_infotxt()
+    save_topluto()
 
 
     # Find critical density.
