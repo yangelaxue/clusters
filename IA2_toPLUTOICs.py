@@ -322,6 +322,8 @@ if __name__=="__main__":
     
     # Save grid.
     save_grid0()
+    # Save info.
+    save_infotxt()
 
 
     # Find critical density.
