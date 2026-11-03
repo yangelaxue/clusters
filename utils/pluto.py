@@ -259,7 +259,7 @@ def get_hdf5Names(Path:str):
     """
     f_names = [f_name for f_name in os.listdir(Path) if f_name.endswith(".dbl.h5")]
     f_nums = np.sort([int(f_name[5:9]) for f_name in f_names])
-    sorted_hdf5Names = [f"data.{("000"+str(f_num))[-4:]}.dbl.h5" for f_num in f_nums]
+    sorted_hdf5Names = ["data.{}.dbl.h5".format(("000"+str(f_num))[-4:]) for f_num in f_nums]
     return sorted_hdf5Names
 
 def get_varNames(Path:str):
