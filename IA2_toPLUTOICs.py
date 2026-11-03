@@ -223,6 +223,7 @@ if __name__=="__main__":
 
     n_points = np.prod(shape_final)
     for varName,val in zip(scalarNames,scalarvals):
+        print("Processing variable:",varName)
         if varName=="Density":
             varName = "rho"
             rho_min = val.min()
@@ -232,6 +233,7 @@ if __name__=="__main__":
         with open(os.path.join(savePath, f"{varName}0.dbl"),"wb") as f_o:
             f_o.write(struct.pack("<"+"d"*n_points,*(val.T.flatten())))
     for varName,val in zip(vxNames,vxvals):
+        print("Processing variable:",varName)
         if varName.startswith("x"):
             varName = "vx1"
         elif varName.startswith("y"):
@@ -241,6 +243,7 @@ if __name__=="__main__":
         with open(os.path.join(savePath, f"{varName}0.dbl"),"wb") as f_o:
             f_o.write(struct.pack("<"+"d"*n_points,*(val.T.flatten())))
     for varName,val in zip(BxNames,Bxvals):
+        print("Processing variable:",varName)
         if varName.endswith("x"):
             varName = "Bx1"
         elif varName.endswith("y"):
@@ -251,6 +254,7 @@ if __name__=="__main__":
             f_o.write(struct.pack("<"+"d"*n_points,*(val.T.flatten())))
     # Save potentials velocities
     for i,val in enumerate(pot):
+        print("Processing variable:","pot"+str(i))
         with open(os.path.join(savePath, f"pot{i}0.dbl"),"wb") as f_o:
             f_o.write(struct.pack("<"+"d"*n_points,*(val.T.flatten())))
     # Save grid.
