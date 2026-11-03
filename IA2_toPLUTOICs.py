@@ -94,6 +94,147 @@ def interpolate(val,L_in,L_out,shape_out):
     ret = RegularGridInterpolator(xyz_in,val)(points).reshape(shape_out)
     return ret
 
+def process_rho_prs():
+    """ Process density and pressure values. """
+    
+    global rho_min, prs_min
+    # Load density and pressure values.
+    scalarNames = ["Density","Pressure"]
+    scalarvals = ia2.gen_vals(varNames=scalarNames,snapshot=snapshots[0],c=c,units=units,mu=mu)
+    # Extend grids.
+    scalarvals = (extend_domain(val,shapes_ext[0],centres[0]) for val in scalarvals)
+    # Apodize all fields
+    scalarvals = (fade_outskirts(val,dLs[0]) for val in scalarvals)
+    # Interpolate to final dimensions.
+    scalarvals = (interpolate(val,Ls[0],L_final,shape_final) for val in scalarvals)
+    # Save structs.
+    n_points = np.prod(shape_final)
+    for varName,val in zip(scalarNames,scalarvals):
+        print("Processing variable:",varName)
+        if varName=="Density":
+            varName = "rho"
+            rho_min = val.min()
+        if varName=="Pressure":
+            varName = "prs"
+            prs_min = val.min()
+        with open(os.path.join(savePath, f"{varName}0.dbl"),"wb") as f_o:
+            f_o.write(struct.pack("<"+"d"*n_points,*(val.T.flatten())))
+
+def process_pots():
+    """ Process gravitational potential values. """
+
+    # Load density values.
+    dens = (
+        rho+dm for rho,dm in zip(
+            ia2.gen_vals("Density",snapshots=snapshots,c=c,units=units),
+            ia2.gen_vals("Dark_Matter_Density",snapshots=snapshots,c=c,units=units)
+            )
+        )
+    dens = (extend_domain(val,shapes_ext[i],centres[i]) for i,val in enumerate(dens))
+    # Calculate gravitational potentials.
+    pot = (calc_gravpot(dens,(dL,)*3,G=G_0) for dens,dL in zip(dens,dLs))
+    pot = (pot-pot.max() for pot in pot)
+    # Interpolate to final dimensions.
+    pot = (interpolate(val,L,L_final,shape_final) for val,L in zip(pot,Ls))
+    # Save structs.
+    for i,val in enumerate(pot):
+        print("Processing variable:","pot"+str(i))
+        with open(os.path.join(savePath, f"pot{i}0.dbl"),"wb") as f_o:
+            f_o.write(struct.pack("<"+"d"*n_points,*(val.T.flatten())))
+
+def process_vx():
+    """ Process velocity values. """
+
+    # Load velocity values.
+    vxNames = ["Density","x-velocity","y-velocity","z-velocity"]
+    vxvals = ia2.gen_vals(varNames=vxNames,snapshot=snapshots[0],c=c,units=units)
+    # Extend grids.
+    vxvals = (extend_domain(val,shapes_ext[0],centres[0]) for val in vxvals)
+    # Remove average velocity.
+    rho = next(vxvals)
+    vxvals = (vx-calc_avgvelocity(rho,vx) for vx in vxvals)
+    # Apodize velocity values.
+    if apd_radius>0:
+        vxvals = (apodize(val,apd_radius,apd_slope,dLs[0]) for val in vxvals)
+    # Interpolate to final dimensions.
+    vxvals = (interpolate(val,Ls[0],L_final,shape_final) for val in vxvals)
+    # Save structs.
+    for varName,val in zip(vxNames[1:],vxvals):
+        print("Processing variable:",varName)
+        if varName.startswith("x"):
+            varName = "vx1"
+        elif varName.startswith("y"):
+            varName = "vx2"
+        elif varName.startswith("z"):
+            varName = "vx3"
+        with open(os.path.join(savePath, f"{varName}0.dbl"),"wb") as f_o:
+            f_o.write(struct.pack("<"+"d"*n_points,*(val.T.flatten())))
+
+def process_Bx():
+    """ Process magnetic field values. """
+
+    # Load magnetic field values.
+    BxNames = ["Bx","By","Bz"]
+    Bxvals = ia2.gen_vals(varNames=BxNames,snapshot=snapshots[0],c=c,units=units)
+    # Extend grids.
+    Bxvals = (extend_domain(val,shapes_ext[0],centres[0]) for val in Bxvals)
+    # Apodize magnetic field values.
+    if apd_radius>0:
+        Bxvals = (apodize(val,apd_radius,apd_slope,dLs[0]) for val in Bxvals)
+    # Interpolate to final dimensions.
+    Bxvals = (interpolate(val,Ls[0],L_final,shape_final) for val in Bxvals)
+    # Save structs.
+    for varName,val in zip(BxNames,Bxvals):
+        print("Processing variable:",varName)
+        if varName.endswith("x"):
+            varName = "Bx1"
+        elif varName.endswith("y"):
+            varName = "Bx2"
+        elif varName.endswith("z"):
+            varName = "Bx3"
+        with open(os.path.join(savePath, f"{varName}0.dbl"),"wb") as f_o:
+            f_o.write(struct.pack("<"+"d"*n_points,*(val.T.flatten())))
+
+def save_grid0():
+    DIM = 3
+    L = (L_final,)*3
+    with open(os.path.join(savePath, "grid0.out"),"w") as f_o:
+        f_o.write("# GEOMETRY:   CARTESIAN\n")
+        for d in range(DIM):
+            f_o.write(f"{shape_final[d]}\n")
+            for i in range(shape_final[d]):
+                xL = -0.5 + (i-0.5)/(shape_final[d] - 1.)
+                xR = -0.5 + (i+0.5)/(shape_final[d] - 1.)
+                xL *= L[d]
+                xR *= L[d]
+                f_o.write("{:d}   {:12.6e}  {:12.6e}\n".format(i+1, xL, xR))
+
+def get_times():
+    from astropy.cosmology import FlatLambdaCDM
+    import astropy.units as u
+    cosmo = FlatLambdaCDM(H0=IA2.h_0*100*u.km/u.s/u.Mpc, Om0=IA2.Omega_dm0+IA2.Omega_bm0)
+
+    times = []
+    for s in snapshots:
+        z = IA2.get_redshift(s)
+        times.append(cosmo.age(z).value*(1e9*CGS.yr))
+    times = np.array(times)
+    return times-times.min()
+
+def save_infotxt():
+    times = get_times()
+    with open(os.path.join(savePath,"info.txt"),"w") as info:
+        info.write(f"L = {L_final}, L/2 = {L_final/2}\n")
+        info.write(f"rho_0 = {rho_0}\n")
+        info.write(f"L_0 = {L_0}\n")
+        info.write(f"v_0 = {v_0}\n")
+        info.write(f"shape = {shape_final}\n")
+        info.write("\n")
+        info.write(f"rho_min = {rho_min}\n")
+        info.write(f"prs_min = {prs_min}\n")
+        info.write("\n")
+        info.write(f"times = {times/t_0}\n")
+
 def plot(los):
     """ Plot the final apodised fields. """
     from matplotlib.colors import LogNorm
@@ -168,50 +309,21 @@ if __name__=="__main__":
     centres = tuple(ia2.get_centre(s,c=c) for s in snapshots)
     dLs = tuple(IA2.dL * c / (1+IA2.get_redshift(s)) / L_0 for s in snapshots)
 
-    # Generate raw field values.
-    scalarNames = ["Density","Pressure"]
-    vxNames = ["x-velocity","y-velocity","z-velocity"]
-    BxNames = ["Bx","By","Bz"]
-    scalarvals = ia2.gen_vals(varNames=scalarNames,snapshot=snapshots[0],c=c,units=units,mu=mu)
-    vxvals = ia2.gen_vals(varNames=vxNames,snapshot=snapshots[0],c=c,units=units)
-    Bxvals = ia2.gen_vals(varNames=BxNames,snapshot=snapshots[0],c=c,units=units)
-    dens = (
-        rho+dm for rho,dm in zip(
-            ia2.gen_vals("Density",snapshots=snapshots,c=c,units=units),
-            ia2.gen_vals("Dark_Matter_Density",snapshots=snapshots,c=c,units=units)
-            )
-        )
-    rho = ia2.get_val("Density",snapshot=snapshots[0],c=c,units=units)
-
-    # Extend volume to the physical dimensions.
+    # Define global variables for final fields.
     shapes_ext = get_shapes_ext(ia2,snapshots,c=c)
-    scalarvals = (extend_domain(val,shapes_ext[0],centres[0]) for val in scalarvals)
-    vxvals = (extend_domain(val,shapes_ext[0],centres[0]) for val in vxvals)
-    Bxvals = (extend_domain(val,shapes_ext[0],centres[0]) for val in Bxvals)
-    dens = (extend_domain(val,shapes_ext[i],centres[i]) for i,val in enumerate(dens))
-    rho = extend_domain(rho,shapes_ext[0],centres[0])
-    
-    # Remove average velocity.
-    vxvals = (vx-calc_avgvelocity(rho,vx) for vx in vxvals)
-    # Calculate gravitational potentials.
-    pot = (calc_gravpot(dens,(dL,)*3,G=G_0) for dens,dL in zip(dens,dLs))
-    pot = (pot-pot.max() for pot in pot)
-
-    # Apodize all fields
-    scalarvals = (fade_outskirts(val,dLs[0]) for val in scalarvals)
-    if apd_radius>0:
-        vxvals = (apodize(val,apd_radius,apd_slope,dLs[0]) for val in vxvals)
-        Bxvals = (apodize(val,apd_radius,apd_slope,dLs[0]) for val in Bxvals)
-
-    # Interpolate to final dimensions.
     Ls = tuple(shapes_ext[i][0]*dLs[i] for i in range(len(snapshots)))
     L_final = min(L_final,*Ls)
-    scalarvals = (interpolate(val,Ls[0],L_final,shape_final) for val in scalarvals)
-    Bxvals = (interpolate(val,Ls[0],L_final,shape_final) for val in Bxvals)
-    vxvals = (interpolate(val,Ls[0],L_final,shape_final) for val in vxvals)
-    pot = (interpolate(val,L,L_final,shape_final) for val,L in zip(pot,Ls))
+    n_points = np.prod(shape_final)
 
-    # Save final fields!
+    process_rho_prs()
+    process_vx()
+    process_Bx()
+    process_pots()
+    
+    # Save grid.
+    save_grid0()
+
+
     # Find critical density.
     # H2_a = lambda a : IA2.H_0**2 * (IA2.Omega_r0/a**4 + (IA2.Omega_bm0+IA2.Omega_dm0)/a**3 + IA2.Omega_Lambda0 + IA2.Omega_k0/a**2)
     # H2_z = lambda z : H2_a(1/(1+z))
@@ -220,81 +332,6 @@ if __name__=="__main__":
     # rho_cr = rho_cr_z(IA2.get_redshift(snapshots[0]))/rho_0 / 2
     # prs_cr = rho_cr*rho_0/CGS.me*CGS.kB*(temp[temp>0].max()*1e-4)/p_0
     # rho_cr, prs_cr = 0., 0.
-
-    n_points = np.prod(shape_final)
-    for varName,val in zip(scalarNames,scalarvals):
-        print("Processing variable:",varName)
-        if varName=="Density":
-            varName = "rho"
-            rho_min = val.min()
-        if varName=="Pressure":
-            varName = "prs"
-            prs_min = val.min()
-        with open(os.path.join(savePath, f"{varName}0.dbl"),"wb") as f_o:
-            f_o.write(struct.pack("<"+"d"*n_points,*(val.T.flatten())))
-    for varName,val in zip(vxNames,vxvals):
-        print("Processing variable:",varName)
-        if varName.startswith("x"):
-            varName = "vx1"
-        elif varName.startswith("y"):
-            varName = "vx2"
-        elif varName.startswith("z"):
-            varName = "vx3"
-        with open(os.path.join(savePath, f"{varName}0.dbl"),"wb") as f_o:
-            f_o.write(struct.pack("<"+"d"*n_points,*(val.T.flatten())))
-    for varName,val in zip(BxNames,Bxvals):
-        print("Processing variable:",varName)
-        if varName.endswith("x"):
-            varName = "Bx1"
-        elif varName.endswith("y"):
-            varName = "Bx2"
-        elif varName.endswith("z"):
-            varName = "Bx3"
-        with open(os.path.join(savePath, f"{varName}0.dbl"),"wb") as f_o:
-            f_o.write(struct.pack("<"+"d"*n_points,*(val.T.flatten())))
-    # Save potentials velocities
-    for i,val in enumerate(pot):
-        print("Processing variable:","pot"+str(i))
-        with open(os.path.join(savePath, f"pot{i}0.dbl"),"wb") as f_o:
-            f_o.write(struct.pack("<"+"d"*n_points,*(val.T.flatten())))
-    # Save grid.
-    DIM = 3
-    L = (L_final,)*3
-    with open(os.path.join(savePath, "grid0.out"),"w") as f_o:
-        f_o.write("# GEOMETRY:   CARTESIAN\n")
-        for d in range(DIM):
-            f_o.write(f"{shape_final[d]}\n")
-            for i in range(shape_final[d]):
-                xL = -0.5 + (i-0.5)/(shape_final[d] - 1.)
-                xR = -0.5 + (i+0.5)/(shape_final[d] - 1.)
-                xL *= L[d]
-                xR *= L[d]
-                f_o.write("{:d}   {:12.6e}  {:12.6e}\n".format(i+1, xL, xR))
-
-    def get_times():
-        from astropy.cosmology import FlatLambdaCDM
-        import astropy.units as u
-        cosmo = FlatLambdaCDM(H0=IA2.h_0*100*u.km/u.s/u.Mpc, Om0=IA2.Omega_dm0+IA2.Omega_bm0)
-
-        times = []
-        for s in snapshots:
-            z = IA2.get_redshift(s)
-            times.append(cosmo.age(z).value*(1e9*CGS.yr))
-        times = np.array(times)
-        return times-times.min()
-    times = get_times()
-    # prs_min = rho_cr/CGS.mp * CGS.kB * 2.75
-    with open(os.path.join(savePath,"info.txt"),"w") as info:
-        info.write(f"L = {np.array(L)}, L/2 = {np.array(L)/2}\n")
-        info.write(f"rho_0 = {rho_0}\n")
-        info.write(f"L_0 = {L_0}\n")
-        info.write(f"v_0 = {v_0}\n")
-        info.write(f"shape = {shape_final}\n")
-        info.write("\n")
-        info.write(f"rho_min = {rho_min}\n")
-        info.write(f"prs_min = {prs_min}\n")
-        info.write("\n")
-        info.write(f"times = {times/t_0}\n")
 
     plot("x")
     plot("y")
