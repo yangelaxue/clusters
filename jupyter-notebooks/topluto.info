@@ -1,0 +1,10 @@
+# Parameter holding file for IA2_toPLUTOICs.py
+cluster = E14   # Which cluster to apodise.
+snapshots = 10,11   # Which snapshots to apodize
+c = 10			# How small a subset to plot. Defaults to 40.
+Delta = 200		# Delta times critical density. Defaults to 200.
+mu = 0.5		# Mean molecular mass. Defaults to 0.5.
+L_final = 2.25		# Final box dimension in cluster units.
+shape_final = (128,128,128)	# Final dimensions of cluster. Defaults to (64,64,64)
+apd_radius = 0.8 		# Radius which to apodize all fields, in cluster units. Defaults to 0.5
+apd_slope = 8.0 		# Slope of apodization, in cluster units. Defaults to 16.0
