@@ -14,6 +14,7 @@ def calc_vminsvmaxs(pd,varNames,snapshots,units="code"):
             vals = pd.gen_vals(varName=varName,snapshots=snapshots,units=units)
             val_max = 0.
             for val in vals:
+                val = val[val.shape[0]//2]
                 val_max = max(val_max,np.abs(val).max())
             val_min = -val_max
         else:
@@ -21,6 +22,7 @@ def calc_vminsvmaxs(pd,varNames,snapshots,units="code"):
             val_max = 0.
             val_min = 0.
             for val in vals:
+                val = val[val.shape[0]//2]
                 val_max = max(val_max,val.max())
                 val_min = min(val_min,val.min())
         vmins[varName] = val_min
