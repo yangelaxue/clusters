@@ -78,7 +78,7 @@ if __name__=="__main__":
     vmins["prs"] = None
     for s in snapshots:
         vals = pd.gen_vals(varNames=varNames,snapshot=s,units="code")
-        fig = plot_vars(vals,varNames,vmins=vmins,vmaxs=vmaxs,x=x,y=y)
+        fig = plot_vars(vals,varNames,vmins=vmins,vmaxs=vmaxs,x=x,y=y,xticks=[],yticks=[])
         fig.suptitle(f"t={times[s]}")
         plt.savefig(os.path.join(Path,"images",f"fields_{s}.png"),dpi=Style.figkwargs["dpi"])
         plt.close()
@@ -87,7 +87,7 @@ if __name__=="__main__":
     vmins, vmaxs = calc_vminsvmaxs(pd,derived_varNames,snapshots,units="code")
     for s in snapshots:
         vals = pd.gen_vals(varNames=derived_varNames,snapshot=s,units="code")
-        fig = plot_vars(vals,derived_varNames,vmins=vmins,vmaxs=vmaxs,x=x,y=y)
+        fig = plot_vars(vals,derived_varNames,vmins=vmins,vmaxs=vmaxs,x=x,y=y,xticks=[],yticks=[])
         fig.suptitle(f"t={times[s]}")
         plt.savefig(os.path.join(Path,"images",f"derivedfields_{s}.png"),dpi=Style.figkwargs["dpi"])
         plt.close()
