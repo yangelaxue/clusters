@@ -65,7 +65,7 @@ class Style:
         from mpl_toolkits.axes_grid1 import make_axes_locatable
 
         kwargs = {
-            "size" : .2,
+            "size" : .1,
             "pad" : 0.,
             "loc" : "right",
             }
@@ -88,13 +88,13 @@ class Style:
         if varName in {"rho","Density"}:
             kwargs.update({
                 "title" : "Density",
-                "cmap" : "plasma",
+                "cmap" : "magma",
                 "symbol" : r"$\rho$",
             })
         elif varName in {"dm","Dark_Matter_Density"}:
             kwargs.update({
                 "title" : "Dark Matter Density",
-                # "cmap" : "plasma", #TODO
+                "cmap" : "cividis", #TODO
                 "symbol" : r"$\rho_{\rm DM}$",
             })
         elif varName in {"prs","Pressure"}:
@@ -106,7 +106,7 @@ class Style:
         elif varName in {"tem","Temperature"}:
             kwargs.update({
                 "title" : "Temperature",
-                # "cmap" : "plasma", #TODO
+                "cmap" : "Spectral_r", #TODO
                 "symbol" : "T$",
             })
         elif varName in {"vx1","vx","x-velocity"}:
@@ -224,6 +224,8 @@ def plot_var(val,varName,**kwargs):
         "yticks" : None,
         "x" : None,
         "y" : None,
+        "slc" : None,
+        "los" : 'x',
     }
     if not ("x" in kwargs and "y" in kwargs):
         _kwargs["xticks"] = []
@@ -238,7 +240,9 @@ def plot_var(val,varName,**kwargs):
         kwargs["yticks"] = kwargs["yticks"].tolist()
 
     if val.ndim==3:
-        val = val[val.shape[0]//2]
+        if kwargs["slc"]==None:
+            kwargs["slc"] = val.shape[0]//2
+        val = get_slice(val,slc=kwargs["slc"],los=kwargs["los"],c=1)
 
     norm = None
     if varName in {"rho","dm","prs","Density","Dark_Matter_Density","Pressure","Temperature"}: #TODO
@@ -284,6 +288,7 @@ def plot_vars(vals,varNames,**kwargs):
     import matplotlib.pyplot as plt
     from matplotlib.colors import LogNorm
 
+    cbar_kwargs = {key.removeprefix("cbar_") : item for key, item in kwargs.items() if key.startswith("cbar_")}
     _kwargs = {
         "vmins" : {},
         "vmaxs" : {},
@@ -291,6 +296,8 @@ def plot_vars(vals,varNames,**kwargs):
         "yticks" : None,
         "x" : None,
         "y" : None,
+        "slc" : None,
+        "los" : 'x',
     }
     if not ("x" in kwargs and "y" in kwargs):
         _kwargs["xticks"] = []
@@ -309,7 +316,9 @@ def plot_vars(vals,varNames,**kwargs):
 
     for i,(val,varName) in enumerate(zip(vals,varNames)):
         if val.ndim==3:
-            val = val[val.shape[0]//2]
+            if kwargs["slc"]==None:
+                kwargs["slc"] = val.shape[0]//2
+            val = get_slice(val,slc=kwargs["slc"],los=kwargs["los"],c=1)
         
         varkwargs = Style.get_varkwargs(varName)
         ax = fig.add_subplot(nrows,3,i+1)
@@ -345,12 +354,37 @@ def plot_vars(vals,varNames,**kwargs):
             im = ax.pcolormesh(val,cmap=cmap,vmin=vmin,vmax=vmax,norm=norm)
         else:
             im = ax.pcolormesh(x,y,val,cmap=cmap,vmin=vmin,vmax=vmax,norm=norm)
-        cbar = Style.get_cbar(im,fig,ax,size=.1)
+        cbar = Style.get_cbar(im,fig,ax,**cbar_kwargs)
 
     return fig
 
-
 #%% Animations!
+
+def animate_pngs(fNames,**kwargs):
+    """
+    Given a list of pngs, animate them into a movie.
+    """
+    import matplotlib.pyplot as plt
+    import matplotlib.animation as animation
+    from matplotlib.image import imread
+    import os
+
+    _kwargs = {
+        "saveName" : os.path.join(os.path.dirname(fNames[0]),"animation.mp4"),
+        "interval" : 50,
+    }
+    kwargs = Style.figkwargs | _kwargs | kwargs
+    saveName = kwargs["saveName"]
+
+    fig, ax = plt.subplots(1,1,figsize=kwargs["figsize"],tight_layout=kwargs["tight_layout"],frameon=False)
+    ax.set_axis_off()
+    ims = []
+    for fName in fNames:
+        im = plt.imread(fName)
+        ims.append([ax.imshow(im,animated=True)])
+    
+    ani = animation.ArtistAnimation(fig,ims,interval=kwargs["interval"])
+    ani.save(saveName,dpi=kwargs["dpi"])
 
 # def animate_line(y_vals,x_vals,fig,ax,labels=[],savePath='lines.mp4',**_kwargs):
 
