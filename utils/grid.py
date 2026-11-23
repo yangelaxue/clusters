@@ -18,6 +18,7 @@ def get_meshgrid(shape,centre=None):
         centre = tuple(sh//2 for sh in shape)
     xyz = tuple(np.arange(0,sh)-cen for sh,cen in zip(shape,centre))
     XYZ = np.meshgrid(*xyz,indexing='ij')
+    return XYZ
 
 def get_Rmesh(shape,centre=None):
     """ Generate a spherical radial meshgrid. """

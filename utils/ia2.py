@@ -9,6 +9,8 @@ Revised: Oct 2026
 import numpy as np
 import os, h5py
 from utils.units import CGS
+from astropy.cosmology import FlatLambdaCDM
+import astropy.units as u
 
 class IA2:
     """ Information for all clusters. """
@@ -21,12 +23,13 @@ class IA2:
     Omega_k0 = 0.
     h_0 = 0.72
     H_0 = 100*h_0*1e5/(CGS.pc*1e6) # CGS units.
-    dL = 3.95 * (1e3*CGS.pc) # Comoving cell width.
+    cosmo = FlatLambdaCDM(H0=h_0*100*u.km/u.s/u.Mpc, Om0=Omega_dm0+Omega_bm0)
 
     # Conversion to CGS units
     cd = 2.66e-30
     cv = 6.47e9
     cb = (cd*4*np.pi)**.5 * cv
+    dL = 3.95 * (1e3*CGS.pc) # Comoving cell width.
 
     # Fields stored.
     fields = {
@@ -210,7 +213,7 @@ class IA2Data:
     def get_units(self,Delta):
         """
         Return cluster units in CGS units.
-        Units returned are: r_Delta, M_Delta, c_s, t_s, centre density.
+        Units returned are: rho_0, L_0, v_0, t_0, p_0, B_0.
         """
         with open(os.path.join(self.Path,"clusterunits.txt"),"r") as f:
             for line in f.readlines():
