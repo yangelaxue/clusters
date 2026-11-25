@@ -40,7 +40,7 @@ def get_CoolingFunction(Z):
     
     return CubicSpline(T_arr, cool_arr)
 
-def get_XraySB(rho,prs=None,T=None,mu=1.,Z=0.3,dx=1.,los='x'):
+def get_XraySB(rho,prs=None,T=None,mu=1.,Z=0.3,dx=1.,los=0):
     """
     Given field values and line-of-sight, integrate to calculate the X-ray surface brightness.
     Gives the CGS surface brightness value if inputs are in CGS units.
@@ -83,7 +83,7 @@ def get_XraySB(rho,prs=None,T=None,mu=1.,Z=0.3,dx=1.,los='x'):
 
     return SB
 
-def get_SZSB(prs,dx=1.,los='x'):
+def get_SZSB(prs,dx=1.,los=0):
     """
     Given field values and line-of-sight, integrate to calculate the X-ray surface brightness.
     Gives the CGS surface brightness value if inputs are in CGS units.

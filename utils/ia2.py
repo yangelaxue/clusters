@@ -60,7 +60,7 @@ class IA2:
 
     # Define path for the clusters
     if os.uname().nodename=="yange":
-        Path = "/media/yange/MyDrive/2024PhDData/EnzoIA2/"
+        Path = "/run/media/yange/MyDrive/2024PhDData/EnzoIA2/"
     elif "nesi" in os.uname().nodename:
         Path = "/home/xuean/00_nesi_projects/vuw04655_nobackup/IA2"
     else:

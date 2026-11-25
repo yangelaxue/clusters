@@ -91,6 +91,7 @@ class PlutoData:
         self.shape = (shape_x, shape_y, shape_z,)
 
         self.bbox = get_bbox(self.Path)
+        self.domain = get_domain(self.Path)
         self.varNames = get_varNames(self.Path)
 
     def print_attr(self,):
@@ -282,6 +283,12 @@ def get_bbox(Path:str):
                 domain = line.split("[")[1].split("]")[0].split(",")
                 bbox.append([float(domain[0]),float(domain[1])])
     return np.array(bbox)
+
+def get_domain(Path:str):
+    """ Retrive domain. Code units. """
+    bbox = get_bbox(Path)
+    domain = np.array([b[1]-b[0] for b in bbox])
+    return domain
 
 def get_val(Path,varName,snapshot,c=1):
     """
