@@ -28,7 +28,7 @@ def get_CoolingFunction(Z):
     Z = 0.3, 1.0, 3.0
     """
 
-    cooltab_fname = os.path.join(os.environ['PLUTO_DIR'],'Src/Cooling/TABULATED/cooltab_z03z3.dat')
+    cooltab_fname = os.path.join(os.environ['PLUTO_DIR'],'Src/Cooling/Tabulated/cooltab_z03z3.dat')
     if float(Z)==0.3:
         T_arr, cool_arr = np.loadtxt(cooltab_fname,usecols=(0,1),skiprows=1)[:-1].T
     elif float(Z)==1.0:
